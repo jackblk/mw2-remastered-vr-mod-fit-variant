@@ -45,7 +45,7 @@ namespace vr::gameplay::equipment::action_slots
 			const auto* bytes=reinterpret_cast<const std::byte*>(player);
 			if(!utils::native_memory::read_bytes(&current_type,bytes+0x1fa0+index*4,4) || current_type!=type ||
 				(type==1 && (!utils::native_memory::read_bytes(&current_weapon,bytes+0x1fb0+index*4,4) || current_weapon!=weapon)))return;
-			const auto* table=reinterpret_cast<const char* const*>(0x140BF84E0);
+			const auto* table=reinterpret_cast<const char* const*>(game::build::relocate(0x140BF84E0));
 			const auto press="+actionslot "+std::to_string(index+1),release="-actionslot "+std::to_string(index+1);
 			const unsigned down=19+index*2,up=down+1;
 			if(!table[down] || !table[up] || std::string_view(table[down])!=press || std::string_view(table[up])!=release)return;

@@ -36,7 +36,7 @@ namespace vr::gameplay::grenades::throwback
 		constexpr std::uint8_t weapon_class[]{0x48,0x89,0x5c,0x24,0x20,0x55,0x56,0x57,0x48,0x83,0xec,0x50};
 		installed=verify(0x140369fb6,hud) && verify(0x140527a4e,timer) && verify(0x1404adf60,pickup) &&
 			verify(0x1404adfdf,handoff) && verify(0x1404c6fb0,missile) && verify(0x1404cfe1a,attribution) && verify(0x1406a4fc0,weapon_class) &&
-			read<std::uintptr_t>(reinterpret_cast<const void*>(0x140bf5060),0)==0x1404c6010;
+			read<std::uintptr_t>(reinterpret_cast<const void*>(game::build::relocate(0x140bf5060)),0)==0x1404c6010;
 		return installed;
 	}
 	bool ready()noexcept{return installed;}

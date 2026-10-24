@@ -1,5 +1,6 @@
 #pragma once
 
+#include "build.hpp"
 #include "structs.hpp"
 #include "launcher/launcher.hpp"
 
@@ -30,7 +31,7 @@ namespace game
 
 		T* get() const
 		{
-			return reinterpret_cast<T*>(address_);
+			return build::relocate(address_);
 		}
 
 		operator T* () const

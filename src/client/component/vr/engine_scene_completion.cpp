@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "engine_scene_completion.hpp"
 #include "engine_scene_job_capture.hpp"
 #include "loader/target_identity.hpp"
@@ -9,7 +10,7 @@ namespace vr::engine_scene_completion
 {
 	namespace
 	{
-		constexpr std::uintptr_t backend_frontend = 0x151A7F3B0;
+		constexpr game::build::data_address backend_frontend{0x151A7F3B0};
 		constexpr std::uintptr_t wait_function = 0x140793DE0;
 		constexpr std::array<std::uintptr_t, 3> predicates{0x1407A7190, 0x1407A71F0, 0x1407A71C0};
 		std::atomic_uint64_t attempts{}, completions{}, failures{}, pending{};
@@ -44,7 +45,7 @@ namespace vr::engine_scene_completion
 				0x48,0x83,0xEC,0x28,0x48,0x8B,0x05,0,0,0,0,
 				0x8B,0x88,0,0,0,0,0x85,0xC9,0x74,0x0A,0xB8,0x01,0,0,0,
 				0x48,0x83,0xC4,0x28,0xC3,0xE8,0,0,0,0,0x33,0xC0,0x48,0x83,0xC4,0x28,0xC3};
-			const auto global_delta = static_cast<std::int32_t>(backend_frontend - (predicates[i] + 11));
+			const auto global_delta = static_cast<std::int32_t>(backend_frontend.get() - (predicates[i] + 11));
 			const std::array<std::uint32_t, 3> offsets{0x541BE8, 0x541BF0, 0x541BF4};
 			const auto slow_delta = static_cast<std::int32_t>(0x14079A3C0 - (predicates[i] + 36));
 			std::memcpy(bytes.data()+7, &global_delta, 4);
@@ -58,7 +59,7 @@ namespace vr::engine_scene_completion
 	{
 		attempts.fetch_add(1, std::memory_order_relaxed);
 		region_capture::phase_scope timing(region_capture::phase::scene_completion, record, frontend);
-		const auto identity = [] { return *reinterpret_cast<const volatile std::uintptr_t*>(backend_frontend); };
+		const auto identity = [] { return *reinterpret_cast<const volatile std::uintptr_t*>(backend_frontend.get()); };
 		if (frontend && identity() == frontend && !read_flags(frontend).complete())
 			pending.fetch_add(1, std::memory_order_relaxed);
 		// Stage-0..3 job 0x1B is queued by the original frontend generator.

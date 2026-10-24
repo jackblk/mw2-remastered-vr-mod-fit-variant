@@ -49,7 +49,7 @@ namespace vr::gameplay::grenades::native
 		}
 		out={weapon,k,fuse,radius};return true;
 	}
-	int time()noexcept{return ready?*reinterpret_cast<const int*>(0x1455cc780):0;}
+	int time()noexcept{return ready?*reinterpret_cast<const int*>(game::build::relocate(0x1455cc780)):0;}
 	game::gentity_s* spawn_projectile(std::uint32_t weapon,hands::vec position,hands::vec velocity,bool rotate,int fuse_ms)noexcept
 	{
 		if(!server() || !weapon || weapon>=512 || !game::weapon_defs[weapon] || int(game::weapon_defs[weapon]->weapType)!=2 || fuse_ms<0 || fuse_ms>60000)return nullptr;

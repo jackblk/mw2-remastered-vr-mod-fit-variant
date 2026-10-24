@@ -53,9 +53,9 @@ namespace database
 			switch (db_filesysImpl->current.integer)
 			{
 			case 0:
-				return reinterpret_cast<game::DB_FileSysInterface*>(0x140BE82F8); // ptr to vtable of BnetTACTVFSManager (implements DB_FileSysInterface)
+				return reinterpret_cast<game::DB_FileSysInterface*>(game::build::relocate(0x140BE82F8)); // ptr to vtable of BnetTACTVFSManager (implements DB_FileSysInterface)
 			case 1:
-				return reinterpret_cast<game::DB_FileSysInterface*>(0x140BEFDC0); // ptr to vtable of DiskFS (implements DB_FileSysInterface)
+				return reinterpret_cast<game::DB_FileSysInterface*>(game::build::relocate(0x140BEFDC0)); // ptr to vtable of DiskFS (implements DB_FileSysInterface)
 			default:
 				return nullptr; // this should not happen
 			}
@@ -448,7 +448,7 @@ namespace database
 			// Allow bnet filesystem to also load files from disk
 			if (db_filesysImpl->current.integer == 0)
 			{
-				const auto bnet_interface = reinterpret_cast<game::DB_FileSysInterface*>(0x140BE82F8);
+				const auto bnet_interface = reinterpret_cast<game::DB_FileSysInterface*>(game::build::relocate(0x140BE82F8));
 
 				bnet_fs_open_file_hook.create(bnet_interface->vftbl->OpenFile, bnet_fs_open_file_stub);
 				bnet_fs_read_hook.create(bnet_interface->vftbl->Read, bnet_fs_read_stub);

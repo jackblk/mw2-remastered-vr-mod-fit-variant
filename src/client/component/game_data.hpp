@@ -5,7 +5,17 @@
 
 namespace game_data
 {
-	inline constexpr std::uintmax_t supported_binary_size = 0xE1E0C8;
+	// Official 1.1.2.1279292 and its accessibility variant (larger signature block).
+	inline constexpr std::uintmax_t supported_binary_sizes[]{0xE1E0C8, 0xE1E248};
+	inline constexpr bool is_supported_binary_size(const std::uintmax_t size) noexcept
+	{
+		for (const auto supported : supported_binary_sizes)
+		{
+			if (size == supported) return true;
+		}
+		return false;
+	}
+
 	inline std::string get_game_binary_path()
 	{
 		return std::ifstream("MW2CR.exe").good() ? "MW2CR.exe" : "h2_sp64_bnet_ship.exe";
@@ -18,7 +28,7 @@ namespace game_data
 		try
 		{
 			const auto path = get_game_binary_path();
-			if (!std::filesystem::is_regular_file(path) || std::filesystem::file_size(path) != supported_binary_size) return false;
+			if (!std::filesystem::is_regular_file(path) || !is_supported_binary_size(std::filesystem::file_size(path))) return false;
 			std::ifstream file(path, std::ios::binary);
 			char signature[2]{};
 			return file.read(signature, sizeof(signature)) && signature[0] == 'M' && signature[1] == 'Z';

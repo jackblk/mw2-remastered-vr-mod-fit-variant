@@ -20,7 +20,8 @@ namespace vr::gameplay::weapons::native_weapon_fx
 		constexpr std::uintptr_t flash_query=0x1406A9440,brass_query=0x1406A95F0,last_brass_query=0x1406A9490;
 		constexpr std::uintptr_t play_oriented=0x140453F50;
 		constexpr std::uintptr_t surface_impact = 0x1404608C0, impact_row = 0x140460940,
-		                         direct_impact = 0x140460810, impact_table = 0x141B95A38;
+		                         direct_impact = 0x140460810;
+		constexpr game::build::data_address impact_table{0x141B95A38};
 		utils::hook::detour surface_impact_hook;
 		std::atomic_bool ready{};
 		struct counters {std::uint64_t shots{},flashes{},shells{},no_flash{},no_brass{},extractions{};std::string flash,brass;};
@@ -46,7 +47,7 @@ namespace vr::gameplay::weapons::native_weapon_fx
 			game::FxEffectDef** entries{};
 			game::FxEffectDef* effect{};
 			if (!utils::native_memory::read_bytes(
-			        &table, reinterpret_cast<const void*>(impact_table), sizeof(table)) ||
+			        &table, reinterpret_cast<const void*>(impact_table.get()), sizeof(table)) ||
 			    !table || !utils::native_memory::read_at(table, 8, entries) || !entries ||
 			    !utils::native_memory::read_at(
 			        entries, (std::size_t(row) * 53 + surface) * sizeof(void*), effect))

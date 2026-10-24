@@ -24,8 +24,8 @@ namespace vr::gameplay::weapons::native_ammunition
 		bool verified{};
 		constexpr std::uintptr_t clip_key_address = 0x14069D250;
 		constexpr std::uintptr_t ammo_key_address = 0x14069D0B0;
-		constexpr std::uintptr_t predicted_ps = 0x141BB3C30;
-		constexpr std::uintptr_t weapon_definitions = 0x14CE01580;
+		constexpr game::build::data_address predicted_ps{0x141BB3C30};
+		constexpr game::build::data_address weapon_definitions{0x14CE01580};
 		bool carried_verified{}, reload_verified{};
 		bool has_ammunition(std::uint32_t weapon) noexcept
 		{
@@ -75,7 +75,7 @@ namespace vr::gameplay::weapons::native_ammunition
 			{
 				const auto token = out.ammo.weapon;
 				if (!unique_inventory_record(ps,token)) return false;
-				const auto definition = read<const void*>(reinterpret_cast<const void*>(weapon_definitions), token*8);
+				const auto definition = read<const void*>(reinterpret_cast<const void*>(weapon_definitions.get()), token*8);
 				if (reinterpret_cast<std::uintptr_t>(definition) < 0x10000) return false;
 				const auto shape=reload_layout::decode({static_cast<const std::byte*>(definition),reload_layout::extent});
 				if (!shape) return false;
@@ -137,7 +137,7 @@ namespace vr::gameplay::weapons::native_ammunition
 			return -1;
 		if (ps == game::g_entities[0].client)
 			return 0;
-		return reinterpret_cast<std::uintptr_t>(ps) == predicted_ps ? 1 : -1;
+		return reinterpret_cast<std::uintptr_t>(ps) == predicted_ps.get() ? 1 : -1;
 	}
 	bool reload_layout_ready() noexcept { return reload_verified; }
 	reload_snapshot observe_reload(const void* ps) noexcept

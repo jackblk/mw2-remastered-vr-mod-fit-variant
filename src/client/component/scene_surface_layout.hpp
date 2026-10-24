@@ -4,6 +4,8 @@
 #include <limits>
 #include <optional>
 
+#include "game/build.hpp"
+
 namespace scene_surface_storage
 {
 	// NECESSARY FORMAT CHANGE, not spare cache memory:
@@ -21,7 +23,7 @@ namespace scene_surface_storage
 	inline constexpr std::size_t brush_prefix_bytes=32;
 	inline constexpr std::size_t brush_surface_bytes=24;
 	inline constexpr std::uint32_t native_arena_offset=0x62b700;
-	inline constexpr std::uintptr_t native_first_frontend=0x14ef1eb80;
+	inline constexpr game::build::data_address native_first_frontend{0x14ef1eb80};
 	inline constexpr std::size_t native_frontend_stride=0x1039300;
 
 	// Instruction operands can contain arena+field, not just arena. The initial

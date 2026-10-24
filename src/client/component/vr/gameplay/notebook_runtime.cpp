@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "../h2/entrypoints.hpp"
 #include "notebook_runtime.hpp"
 #include "notebook_model.hpp"
@@ -281,7 +282,7 @@ namespace vr::gameplay::equipment::special::notebook
 			buttons|=1;
 			// Native GSC launch waits on the reliable binding notification. Flight
 			// boost reads the attack bit. Both paths must receive the same input.
-			const auto* table=reinterpret_cast<const char* const*>(0x140BF84E0);
+			const auto* table=reinterpret_cast<const char* const*>(game::build::relocate(0x140BF84E0));
 			if(trigger.pressed && table[1] && std::string_view(table[1])=="+attack")utils::hook::invoke<void>(0x1403D3A90,0,1,0);
 		}
 	}

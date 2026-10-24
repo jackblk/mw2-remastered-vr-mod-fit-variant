@@ -1020,7 +1020,7 @@ namespace vr::native_hud_capture
 			if (!selected) { hook.invoke<void>(cursor); return; }
 			if(selected->menu_index<menu_surface::surface_count)++menu_matches;
 			// Flush pending unrelated tessellation before selecting the primitive.
-			if (*reinterpret_cast<const unsigned*>(0x151A7F378)) game::RB_EndTessSurface();
+			if (*reinterpret_cast<const unsigned*>(game::build::relocate(0x151A7F378))) game::RB_EndTessSurface();
 			// Shader binding is established by the native handler/flush, not here.
 			const auto* selected_command = *cursor;
 			copying_scope = selected;
@@ -1056,11 +1056,11 @@ namespace vr::native_hud_capture
 				void* transformed=scratch.data();hook.invoke<void>(&transformed);
 				*cursor=static_cast<std::byte*>(*cursor)+size;
 				// Complete all reads/draws before the private inline text expires.
-				if (*reinterpret_cast<const unsigned*>(0x151A7F378)) game::RB_EndTessSurface();
+				if (*reinterpret_cast<const unsigned*>(game::build::relocate(0x151A7F378))) game::RB_EndTessSurface();
 				return;
 			}
 			else hook.invoke<void>(cursor);
-			if (*reinterpret_cast<const unsigned*>(0x151A7F378)) game::RB_EndTessSurface();
+			if (*reinterpret_cast<const unsigned*>(game::build::relocate(0x151A7F378))) game::RB_EndTessSurface();
 		}
 		void quad_stub(void** cursor)
 		{
@@ -1551,7 +1551,9 @@ namespace vr::native_hud_capture
 			if(verify(0x14079a158,ui_begin)&&verify(0x14079a1d0,ui_end))
 			{
 				const auto begin=utils::hook::assemble([](auto& a){emit_ui_dispatch_marker(a,reinterpret_cast<std::uintptr_t>(global_ui_begin),0x14079a160,true);});
-				const auto end=utils::hook::assemble([](auto& a){emit_ui_dispatch_marker(a,reinterpret_cast<std::uintptr_t>(global_ui_end),0x14079a1d6,false,0x14079a1d6+0x0e746b2a);});
+				// Replay the replaced load with the loaded image's displacement: the variant maps .data lower.
+				const auto end_load_address=0x14079a1d6+static_cast<std::intptr_t>(*reinterpret_cast<const std::int32_t*>(0x14079a1d2));
+				const auto end=utils::hook::assemble([end_load_address](auto& a){emit_ui_dispatch_marker(a,reinterpret_cast<std::uintptr_t>(global_ui_end),0x14079a1d6,false,end_load_address);});
 				const auto begin_relay=utils::hook::create_preserving_near_jump(0x14079a158,begin);
 				const auto end_relay=utils::hook::create_preserving_near_jump(0x14079a1d0,end);
 				if(begin_relay&&end_relay)

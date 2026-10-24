@@ -132,8 +132,8 @@ namespace vr::gameplay::ladders::scene
             else
             {
                 if(weapons::native_carry::entity_key(item.entity).generation!=item.generation)return false;
-                short idx{};if(!read(reinterpret_cast<const short*>(0x14b113080)+item.entity,idx) || idx<=0 || idx>=4096)return false;
-                const auto* obj=reinterpret_cast<const std::byte*>(0x14ae2dff0)+idx*0x240;
+                short idx{};if(!read(reinterpret_cast<const short*>(game::build::relocate(0x14b113080))+item.entity,idx) || idx<=0 || idx>=4096)return false;
+                const auto* obj=reinterpret_cast<const std::byte*>(game::build::relocate(0x14ae2dff0))+idx*0x240;
                 unsigned char count{};game::XModel** models{};game::XModel* model{};
                 if(!at(obj,15,count) || count!=1 || item.part>=count || !at(obj,216,models) || !read(models+item.part,model) || model!=item.model)return false;
                 const auto* ent=&game::g_entities[item.entity];vec angles{};
@@ -206,8 +206,8 @@ namespace vr::gameplay::ladders::scene
             const int ent=int(++entity_cursor%3998)+1;const auto id=1000000u+unsigned(ent);
             auto it=std::find_if(instances.begin(),instances.end(),[&](const instance& i){return i.id==id;});
             if(it!=instances.end()){if(refresh_instance(*it))continue;instances.erase(it);}
-            short idx{};if(!read(reinterpret_cast<const short*>(0x14b113080)+ent,idx) || idx<=0 || idx>=4096)continue;
-            const auto* obj=reinterpret_cast<const std::byte*>(0x14ae2dff0)+idx*0x240;
+            short idx{};if(!read(reinterpret_cast<const short*>(game::build::relocate(0x14b113080))+ent,idx) || idx<=0 || idx>=4096)continue;
+            const auto* obj=reinterpret_cast<const std::byte*>(game::build::relocate(0x14ae2dff0))+idx*0x240;
             unsigned char nmodels{};game::XModel** models{};game::XModel* model{};
             if(!at(obj,15,nmodels) || nmodels!=1 || !at(obj,216,models) || !read(models,model) || !profile(model) || instances.size()>=max_instances)continue;
             instance item;item.id=id;item.model=model;item.entity=ent;item.generation=weapons::native_carry::entity_key(ent).generation;

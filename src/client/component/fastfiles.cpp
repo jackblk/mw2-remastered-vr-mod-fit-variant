@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "loader/component_loader.hpp"
 #include "game/dvars.hpp"
 #include "game/xmodel_index_contract.hpp"
@@ -396,10 +397,10 @@ namespace fastfiles
 
 			// replace indirect refs
 
-			const auto xmodel_unk_ptr = 0x14417B980;
-			const auto replace_offset = [](const size_t ptr, const void* arr, const int64_t off = 0)
+			const auto xmodel_unk_ptr = game::build::relocate(0x14417B980);
+			const auto replace_offset = [xmodel_unk_ptr](const size_t ptr, const void* arr, const int64_t off = 0)
 			{
-				const auto offset = reinterpret_cast<int64_t>(arr) - xmodel_unk_ptr + off;
+				const auto offset = reinterpret_cast<int64_t>(arr) - static_cast<int64_t>(xmodel_unk_ptr) + off;
 				utils::hook::set<int32_t>(ptr, static_cast<int32_t>(offset));
 			};
 
@@ -624,7 +625,7 @@ namespace fastfiles
 		{
 			if (db_print_loaded_assets->current.enabled)
 			{
-				const auto type = **reinterpret_cast<int**>(0x14224F608);
+				const auto type = **reinterpret_cast<int**>(game::build::relocate(0x14224F608));
 				const auto type_name = game::g_assetNames[type];
 				console::info("Loading asset type \"%s\"\n", type_name);
 			}

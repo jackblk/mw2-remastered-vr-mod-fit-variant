@@ -40,12 +40,12 @@ namespace vr::region_capture
 		void observe_surface_budget(const scene_models::scene_observation& value) noexcept
 		{
 			if (!enabled()) return;
-			const auto frontend=read<std::uintptr_t>(reinterpret_cast<const std::uint8_t*>(0x150F91188));
+			const auto frontend=read<std::uintptr_t>(reinterpret_cast<const std::uint8_t*>(game::build::relocate(0x150F91188)));
 			if (!frontend) return;
 			const auto* frame=reinterpret_cast<const std::uint8_t*>(frontend);
 			emit({0,0,static_cast<std::uint64_t>(kind::surface_budget),value.sequence,value.stage,
 				frontend,read<std::uint32_t>(frame+0x540e14),
-				read<std::uint32_t>(reinterpret_cast<const std::uint8_t*>(0x1513dd9b4)),value.index,
+				read<std::uint32_t>(reinterpret_cast<const std::uint8_t*>(game::build::relocate(0x1513dd9b4))),value.index,
 				value.scratch ? read<std::uint32_t>(static_cast<const std::uint8_t*>(value.scratch)+0x524) : UINT32_MAX,
 				reinterpret_cast<std::uintptr_t>(value.slot)});
 		}
@@ -55,7 +55,7 @@ namespace vr::region_capture
 			const auto id=rigid_sequence.fetch_add(1,std::memory_order_relaxed)+1;
 			const auto* record=static_cast<const std::uint8_t*>(value.record);
 			const auto* entry=static_cast<const std::uint8_t*>(value.entry);
-			const auto frontend=read<std::uintptr_t>(reinterpret_cast<const std::uint8_t*>(0x150F91188));
+			const auto frontend=read<std::uintptr_t>(reinterpret_cast<const std::uint8_t*>(game::build::relocate(0x150F91188)));
 			const auto outcome=(std::uint64_t{static_cast<unsigned>(value.outcome)}<<32) |
 				static_cast<std::uint32_t>(value.native_result);
 			emit({0,0,static_cast<std::uint64_t>(kind::rigid_model),id,0,

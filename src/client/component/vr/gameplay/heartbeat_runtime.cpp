@@ -48,7 +48,7 @@ namespace vr::gameplay::weapons::heartbeat
 		bool fresh(clock::time_point t,clock::time_point now)noexcept{return now>=t && now-t<=150ms;}
 		bool native_open(std::uint32_t weapon)noexcept
 		{
-			const auto* ps=reinterpret_cast<const void*>(0x141BB3C30);
+			const auto* ps=reinterpret_cast<const void*>(game::build::relocate(0x141BB3C30));
 			std::uint32_t selected{},flags{};
 			return read(ps,0x3bc,selected) && selected==weapon && read(ps,0x3c0,flags) && !(flags&0x4000);
 		}
@@ -75,7 +75,7 @@ namespace vr::gameplay::weapons::heartbeat
 			for(int i=0;i<3;++i)
 			{
 				std::uint32_t tag{};
-				if(!read(reinterpret_cast<void*>(0x14641D9CC),i*4,tag) || !tag){++geometry_rejected;return 0;}
+				if(!read(reinterpret_cast<void*>(game::build::relocate(0x14641D9CC)),i*4,tag) || !tag){++geometry_rejected;return 0;}
 				const auto* name=game::SL_ConvertToString(static_cast<game::scr_string_t>(tag));
 				int index=-1;
 				for(int j=0;j<4;++j)if(name && bone_names[5+j]==name)index=j;
@@ -128,7 +128,7 @@ namespace vr::gameplay::weapons::heartbeat
 	{
 		if(!installed || !weapon || (weapon&~511u))return false;
 		const void* definition{};const char* name{};std::array<char,128> text{};
-		if(!read(reinterpret_cast<void*>(0x14CE01580),weapon*8,definition) || !read(definition,0,name) ||
+		if(!read(reinterpret_cast<void*>(game::build::relocate(0x14CE01580)),weapon*8,definition) || !read(definition,0,name) ||
 			!utils::native_memory::read_bytes(text.data(),name,text.size()))return false;
 		const auto size=strnlen_s(text.data(),text.size());if(!size || size==text.size())return false;
 		const std::string_view token(text.data(),size);

@@ -164,7 +164,7 @@ namespace vr::diagnostics::renderer_evidence
 			output
 			    << "H2 target registry CPU snapshot\r\n"
 			    << "label=" << label << "\r\n"
-			    << "base=0x" << std::hex << native_render_contract::target_registry_base << std::dec
+			    << "base=0x" << std::hex << native_render_contract::target_registry_base.get() << std::dec
 			    << " stride=" << native_render_contract::target_registry_stride
 			    << " capacity=" << native_render_contract::target_registry_capacity
 			    << " pointer_occupied=" << pointer_occupied << " dimensioned=" << dimensioned << "\r\n"

@@ -111,8 +111,8 @@ namespace vr::native_menu
 		{
 			if(value.t!=game::hks::TUSERDATA)return 0;
 			const auto handle=read<std::array<std::uint16_t,2>>(reinterpret_cast<std::uintptr_t>(value.v.ptr)+32);
-			const auto base=read<std::uintptr_t>(0x141a783a0),generations=read<std::uintptr_t>(0x141a783a8);
-			const unsigned first=read<std::uint16_t>(0x141a783b4),capacity=read<std::uint16_t>(0x141a783b6);
+			const auto base=read<std::uintptr_t>(game::build::relocate(0x141a783a0)),generations=read<std::uintptr_t>(game::build::relocate(0x141a783a8));
+			const unsigned first=read<std::uint16_t>(game::build::relocate(0x141a783b4)),capacity=read<std::uint16_t>(game::build::relocate(0x141a783b6));
 			if(!base||!generations||!capacity||capacity>16384||handle[0]<first||handle[0]-first>=capacity||
 				read<std::uint16_t>(generations+(handle[0]-first)*2)!=handle[1])return 0;
 			return base+(handle[0]-first)*0x188;
@@ -120,9 +120,9 @@ namespace vr::native_menu
 		bool truth(object v) noexcept {return v.t==game::hks::TBOOLEAN&&v.v.boolean;}
 		bool video_playing() noexcept
 		{
-			return menu_surface::native_video_playing(read<std::uint8_t>(0x14d36add5)!=0,
-				read<std::uint8_t>(0x14d36abc0)!=0,read<std::uint8_t>(0x14d36add4)!=0,
-				read<unsigned>(0x14d36addc),read<unsigned>(0x14d36ade0));
+			return menu_surface::native_video_playing(read<std::uint8_t>(game::build::relocate(0x14d36add5))!=0,
+				read<std::uint8_t>(game::build::relocate(0x14d36abc0))!=0,read<std::uint8_t>(game::build::relocate(0x14d36add4))!=0,
+				read<unsigned>(game::build::relocate(0x14d36addc)),read<unsigned>(game::build::relocate(0x14d36ade0)));
 		}
 		state observe()
 		{
@@ -131,7 +131,7 @@ namespace vr::native_menu
 			s.enabled=installed&&enable&&enable->current.enabled;
 			const auto current_vm=reinterpret_cast<std::uintptr_t>(*game::hks::lua_state);
 			if(!s.enabled||!current_vm){capture_needed=false;const std::lock_guard lock(mutex);published=s;output.reset();input_pointer={};return s;}
-			s.frontend=read<std::uint8_t>(0x140bebccc)!=0;
+			s.frontend=read<std::uint8_t>(game::build::relocate(0x140bebccc))!=0;
 			const auto* paused=game::Dvar_FindVar("cl_paused");
 			const auto* pause_menu=game::Dvar_FindVar("lui_pausemenu");
 			if(!s.frontend&&paused&&paused->current.integer&&pause_menu&&pause_menu->current.enabled)s.scene_dim=140.f/255.f;
@@ -195,7 +195,7 @@ namespace vr::native_menu
 		struct cursor {std::uintptr_t base{},used{};};
 		cursor command_cursor() noexcept
 		{
-			const auto p=read<std::uintptr_t>(0x150f911a8);const auto c=read<cursor>(p);
+			const auto p=read<std::uintptr_t>(game::build::relocate(0x150f911a8));const auto c=read<cursor>(p);
 			return c.base>=0x10000&&c.used<=0x400000?c:cursor{};
 		}
 		std::uint64_t fingerprint(std::uintptr_t begin,std::uintptr_t end,bool growing_lines=false) noexcept
@@ -447,7 +447,7 @@ namespace vr::native_menu
 		// Native CG's cinematic draw at 0x140367F84 combines active playback
 		// with this dvar. It is an ownership gate, never playback evidence alone.
 		const auto* fullscreen=game::Dvar_FindVar("cg_cinematicFullscreen");
-		return {true,read<std::uint8_t>(0x140bebccc)!=0,game::CL_IsCgameInitialized(),
+		return {true,read<std::uint8_t>(game::build::relocate(0x140bebccc))!=0,game::CL_IsCgameInitialized(),
 			video_playing(),fullscreen && fullscreen->current.enabled};
 	}
 	void set_requested(bool value) noexcept {requested=value;if(!value){const std::lock_guard lock(mutex);output.reset();input_pointer={};}}

@@ -67,6 +67,20 @@ namespace utils::hook_validation
 		}
 	};
 
+	// Image data moved by a fixed delta relative to the image that expected bytes
+	// were authored against. A mismatched 4-byte window is then accepted only when
+	// it encodes the same RIP-relative or image-relative target in [begin, end)
+	// moved by delta. A default-constructed value disables the relocation.
+	struct data_relocation
+	{
+		std::uintptr_t image_base{};
+		std::uintptr_t begin{};
+		std::uintptr_t end{};
+		std::intptr_t delta{};
+	};
+
+	void set_data_relocation(const data_relocation& relocation) noexcept;
+
 	[[nodiscard]] masked_byte_result verify_masked_bytes(const void* address,
 		const masked_byte_pattern& pattern) noexcept;
 	[[nodiscard]] executable_target_result validate_executable_target(const void* address) noexcept;

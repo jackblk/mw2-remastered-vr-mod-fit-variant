@@ -244,7 +244,7 @@ namespace camera
 
 			if ((*cg_paused)->current.integer == 2 || vr::head_pose_bridge::camera_was_applied())
 			{
-				const auto lod_origin = reinterpret_cast<float*>(0x14EEE0890);
+				const auto lod_origin = reinterpret_cast<float*>(game::build::relocate(0x14EEE0890));
 				lod_origin[0] = game::refdef->org[0];
 				lod_origin[1] = game::refdef->org[1];
 				lod_origin[2] = game::refdef->org[2];
@@ -351,7 +351,7 @@ namespace camera
 			cl_free_move_scale = dvars::register_float("cl_freemoveScale", 1.f, 0.0001f, 100.f,
 				game::DVAR_FLAG_SAVED, "Scale how fast you move in cl_freemove mode");
 
-			cg_paused = reinterpret_cast<game::dvar_t**>(0x141E39FC0);
+			cg_paused = reinterpret_cast<game::dvar_t**>(game::build::relocate(0x141E39FC0));
 
 			utils::hook::call(0x1403ACB2D, set_viewpos_now_stub);
 			sub_140781090_hook.create(0x140781090, sub_140781090_stub);

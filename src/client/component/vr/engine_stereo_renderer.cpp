@@ -61,8 +61,8 @@ namespace vr::engine_stereo_renderer
 		static_assert(sizeof(game::GfxStateBits) == 0x28);
 		constexpr std::uintptr_t reserve_scene_record_call_site = 0x1403CA20E;
 		constexpr std::uintptr_t reserve_scene_record_function = 0x140779E00;
-		constexpr std::uintptr_t scene_owner_record_index = 0x141C2DB34;
-		constexpr std::uintptr_t scene_owner_argument = 0x141BB3C1C;
+		constexpr game::build::data_address scene_owner_record_index{0x141C2DB34};
+		constexpr game::build::data_address scene_owner_argument{0x141BB3C1C};
 		constexpr std::uintptr_t render_scene_call_site = 0x1403CA23E;
 		constexpr std::uintptr_t render_scene_function = 0x14077B820;
 		constexpr std::uintptr_t allocate_view_slot_call_site = 0x14077B8EB;
@@ -74,9 +74,9 @@ namespace vr::engine_stereo_renderer
 		constexpr std::uintptr_t generate_draw_surfs_function = 0x140778E60;
 		constexpr std::uintptr_t fx_camera_call_site = 0x14045B98E;
 		constexpr std::uintptr_t fx_camera_function = 0x140463310;
-		constexpr std::uintptr_t frontend_data_pointer = 0x150F91188;
-		constexpr std::uintptr_t frontend_global_selector = 0x150F911A0;
-		constexpr std::uintptr_t global_scene_record_count = 0x14EEE0BD0;
+		constexpr game::build::data_address frontend_data_pointer{0x150F91188};
+		constexpr game::build::data_address frontend_global_selector{0x150F911A0};
+		constexpr game::build::data_address global_scene_record_count{0x14EEE0BD0};
 		constexpr std::uintptr_t backend_post_bind_call_site = 0x1407A8469;
 		constexpr std::uintptr_t backend_post_bind_function = 0x1407A7320;
 		constexpr std::uintptr_t backend_target_prepare_function = 0x1407A7DA0;
@@ -84,7 +84,7 @@ namespace vr::engine_stereo_renderer
 		constexpr std::uintptr_t backend_dynamic_upload_function = 0x1407A8A80;
 		constexpr std::array<std::uint8_t, 5> backend_dynamic_upload_bytes{
 			0xE8, 0x49, 0x0A, 0x00, 0x00};
-		constexpr std::uintptr_t backend_frontend_data_pointer = 0x151A7F3B0;
+		constexpr game::build::data_address backend_frontend_data_pointer{0x151A7F3B0};
 		constexpr std::uintptr_t backend_record_call_site = 0x1407A84A1;
 		constexpr std::uintptr_t backend_record_function = 0x1407A6BE0;
 		constexpr std::uintptr_t backend_view_bind_call_site = 0x1407A83D7;
@@ -112,17 +112,17 @@ namespace vr::engine_stereo_renderer
 		constexpr std::uintptr_t backend_command_dispatch_function = 0x14079EAE0;
 		constexpr std::uintptr_t h2_query_publish_call_site = 0x1407A1555;
 		constexpr std::uintptr_t h2_query_publish_function = 0x14074BB90;
-		constexpr std::uintptr_t h2_query_publish_generation = 0x14EEE0D38;
-		constexpr std::uintptr_t h2_query_gate_completed_generation = 0x14EE43A04;
-		constexpr std::uintptr_t h2_query_gate_published_generation = 0x14EEE0D2C;
+		constexpr game::build::data_address h2_query_publish_generation{0x14EEE0D38};
+		constexpr game::build::data_address h2_query_gate_completed_generation{0x14EE43A04};
+		constexpr game::build::data_address h2_query_gate_published_generation{0x14EEE0D2C};
 		constexpr std::uintptr_t h2_query_result_observation_site = 0x1407507E3;
-		constexpr std::uintptr_t h2_query_result_original_global = 0x140C019DC;
+		constexpr game::build::data_address h2_query_result_original_global{0x140C019DC};
 		constexpr std::uintptr_t frontend_record_arena_pointer_offset = 0x540FA0;
-		constexpr std::uintptr_t owner_view_globals = 0x141EB3970;
-		constexpr std::uintptr_t scene_view_globals = 0x14EEE02F4;
-		constexpr std::uintptr_t camera_primary_globals = 0x14EEE0890;
-		constexpr std::uintptr_t camera_secondary_globals = 0x14EEE08B8;
-		constexpr std::uintptr_t per_client_view_output = 0x151427A80;
+		constexpr game::build::data_address owner_view_globals{0x141EB3970};
+		constexpr game::build::data_address scene_view_globals{0x14EEE02F4};
+		constexpr game::build::data_address camera_primary_globals{0x14EEE0890};
+		constexpr game::build::data_address camera_secondary_globals{0x14EEE08B8};
+		constexpr game::build::data_address per_client_view_output{0x151427A80};
 		constexpr std::size_t owner_view_globals_size = 0x18;
 		constexpr std::size_t scene_view_globals_size = 0x18;
 		constexpr std::size_t camera_globals_size = 0x28;
@@ -270,11 +270,11 @@ namespace vr::engine_stereo_renderer
 		{
 			frontend_snapshot result;
 			result.frontend = reinterpret_cast<std::uintptr_t>(
-				*reinterpret_cast<void**>(frontend_data_pointer));
+				*reinterpret_cast<void**>(frontend_data_pointer.get()));
 			result.global_selector = *reinterpret_cast<const std::uint32_t*>(
-				frontend_global_selector);
+				frontend_global_selector.get());
 			result.global_record_count = *reinterpret_cast<const std::uint32_t*>(
-				global_scene_record_count);
+				global_scene_record_count.get());
 			if (result.frontend != 0)
 			{
 				result.slot_count = *reinterpret_cast<const std::uint32_t*>(result.frontend +
@@ -322,7 +322,7 @@ namespace vr::engine_stereo_renderer
 					sizeof(record_arena));
 			}
 			const auto backend_frontend = reinterpret_cast<std::uintptr_t>(
-				*reinterpret_cast<void**>(backend_frontend_data_pointer));
+				*reinterpret_cast<void**>(backend_frontend_data_pointer.get()));
 			const auto frame_id = ensure_boundary_frame_id();
 			const engine_view_probe::ownership_boundary_observation observation{
 					boundary,
@@ -334,8 +334,8 @@ namespace vr::engine_stereo_renderer
 					snapshot.current_record_index,
 					snapshot.record_count,
 					snapshot.global_record_count,
-					*reinterpret_cast<const std::uint32_t*>(scene_owner_record_index),
-					hash_memory_region(owner_view_globals, owner_view_globals_size),
+					*reinterpret_cast<const std::uint32_t*>(scene_owner_record_index.get()),
+					hash_memory_region(owner_view_globals.get(), owner_view_globals_size),
 			};
 			engine_view_probe::record_ownership_boundary(frame_id, depth, observation,
 				stage);
@@ -500,7 +500,7 @@ namespace vr::engine_stereo_renderer
 		std::uintptr_t per_client_output_address(const std::int32_t local_client) noexcept
 		{
 			if (local_client < 0 || local_client >= observed_local_client_capacity) return 0;
-			return per_client_view_output + static_cast<std::uintptr_t>(local_client) *
+			return per_client_view_output.get() + static_cast<std::uintptr_t>(local_client) *
 				view_slot_size;
 		}
 
@@ -515,10 +515,10 @@ namespace vr::engine_stereo_renderer
 				subject,
 				hash_memory_region(view_slot, view_slot != 0 ? view_slot_size : 0),
 				hash_memory_region(output, output != 0 ? view_slot_size : 0),
-				hash_memory_region(scene_view_globals, scene_view_globals_size),
-				hash_memory_region(camera_primary_globals, camera_globals_size),
-				hash_memory_region(camera_secondary_globals, camera_globals_size),
-				hash_memory_region(owner_view_globals, owner_view_globals_size),
+				hash_memory_region(scene_view_globals.get(), scene_view_globals_size),
+				hash_memory_region(camera_primary_globals.get(), camera_globals_size),
+				hash_memory_region(camera_secondary_globals.get(), camera_globals_size),
+				hash_memory_region(owner_view_globals.get(), owner_view_globals_size),
 			};
 		}
 
@@ -532,10 +532,10 @@ namespace vr::engine_stereo_renderer
 				static_cast<std::uint64_t>(snapshot.current_record_index),
 				static_cast<std::uint64_t>(snapshot.record_count),
 				static_cast<std::uint64_t>(snapshot.global_record_count),
-				hash_memory_region(scene_view_globals, scene_view_globals_size),
-				hash_memory_region(camera_primary_globals, camera_globals_size),
-				hash_memory_region(camera_secondary_globals, camera_globals_size),
-				hash_memory_region(owner_view_globals, owner_view_globals_size),
+				hash_memory_region(scene_view_globals.get(), scene_view_globals_size),
+				hash_memory_region(camera_primary_globals.get(), camera_globals_size),
+				hash_memory_region(camera_secondary_globals.get(), camera_globals_size),
+				hash_memory_region(owner_view_globals.get(), owner_view_globals_size),
 			};
 			return hash_memory_region(reinterpret_cast<std::uintptr_t>(values.data()),
 				sizeof(values));
@@ -1932,7 +1932,7 @@ namespace vr::engine_stereo_renderer
 			engine_stereo_backend_target::invoke_select(active_backend_target_route,
 				context, target_id, reinterpret_cast<std::uintptr_t>(_ReturnAddress()),
 				scope,
-				reinterpret_cast<const void*>(native_render_contract::target_registry_base),
+				reinterpret_cast<const void*>(native_render_contract::target_registry_base.get()),
 				native_render_contract::target_registry_capacity,
 				+[](void* const original_context, const std::uint32_t original_target)
 				{
@@ -2023,7 +2023,7 @@ namespace vr::engine_stereo_renderer
 			observation.last_changed = engine_view_probe::invalid_slot_index;
 
 			observation.frontend = reinterpret_cast<std::uintptr_t>(
-				*reinterpret_cast<void**>(backend_frontend_data_pointer));
+				*reinterpret_cast<void**>(backend_frontend_data_pointer.get()));
 			std::uintptr_t record_arena{};
 			std::uint32_t record_count{};
 			if (observation.frontend != 0)
@@ -2080,7 +2080,7 @@ namespace vr::engine_stereo_renderer
 						(void)capture_artifact(evidence::captures.record_before_target_prepare_artifact,
 							reinterpret_cast<std::uintptr_t>(before_bytes.data()), metadata);
 						(void)capture_artifact(evidence::captures.registry_before_target_prepare_artifact,
-							native_render_contract::target_registry_base, metadata);
+							native_render_contract::target_registry_base.get(), metadata);
 					}
 				}
 			}
@@ -2329,7 +2329,7 @@ namespace vr::engine_stereo_renderer
 				(void)capture_artifact(evidence::captures.record_after_target_prepare_artifact,
 					reinterpret_cast<std::uintptr_t>(after_bytes.data()), metadata);
 				(void)capture_artifact(evidence::captures.registry_after_target_prepare_artifact,
-					native_render_contract::target_registry_base, metadata);
+					native_render_contract::target_registry_base.get(), metadata);
 			}
 			if (capture_observation)
 			{
@@ -2428,10 +2428,10 @@ namespace vr::engine_stereo_renderer
 			}
 
 			const auto before = *reinterpret_cast<const std::uint32_t*>(
-				h2_query_publish_generation);
+				h2_query_publish_generation.get());
 			reinterpret_cast<h2_query_publish_fn>(h2_query_publish_function)(query);
 			const auto after = *reinterpret_cast<const std::uint32_t*>(
-				h2_query_publish_generation);
+				h2_query_publish_generation.get());
 			(void)engine_backend_probe::record_query_publish(
 				reinterpret_cast<std::uintptr_t>(query), before, after,
 				frontend_epoch_sequence.load(std::memory_order_relaxed));
@@ -2443,6 +2443,23 @@ namespace vr::engine_stereo_renderer
 		{
 			(void)engine_backend_probe::record_query_result(query, generation,
 				result, complete != 0);
+		}
+
+		// Restoring copy-on-write protection to a page that a write has made
+		// private reads back as the plain writable protection; treat them alike.
+		// Image pages no runtime decryptor touched (an already decrypted build)
+		// are still copy-on-write before their first patch.
+		std::uint32_t effective_protection(const std::uint32_t protection) noexcept
+		{
+			switch (protection & 0xFF)
+			{
+			case PAGE_EXECUTE_WRITECOPY:
+				return (protection & ~0xFFu) | PAGE_EXECUTE_READWRITE;
+			case PAGE_WRITECOPY:
+				return (protection & ~0xFFu) | PAGE_READWRITE;
+			default:
+				return protection;
+			}
 		}
 
 		template <std::size_t Size>
@@ -2461,7 +2478,8 @@ namespace vr::engine_stereo_renderer
 			DWORD ignored{};
 			const auto restored = VirtualProtect(destination, Size, old_protection, &ignored) != FALSE;
 			const auto validation = utils::hook_validation::validate_executable_target(destination);
-			return flushed && restored && validation && validation.protection == old_protection;
+			return flushed && restored && validation &&
+				effective_protection(validation.protection) == effective_protection(old_protection);
 		}
 
 		bool restore_code_protection(const std::uintptr_t address,
@@ -2474,7 +2492,7 @@ namespace vr::engine_stereo_renderer
 			}
 			const auto validation = utils::hook_validation::validate_executable_target(
 				reinterpret_cast<const void*>(address));
-			return validation && validation.protection == protection;
+			return validation && effective_protection(validation.protection) == effective_protection(protection);
 		}
 
 		template <std::size_t Size>
@@ -2490,6 +2508,72 @@ namespace vr::engine_stereo_renderer
 			return static_cast<bool>(utils::hook_validation::verify_masked_bytes(
 				reinterpret_cast<const void*>(address), {bytes.data(), mask.data(), Size}));
 		}
+
+		// Name the first failing step of a code-patch transaction, with the
+		// mismatch or protection detail needed to diagnose it from a user report.
+		struct patch_transaction
+		{
+			const char* failed{};
+			std::string report;
+
+			template <std::size_t Size>
+			bool write(const char* name, const std::uintptr_t address,
+				const std::array<std::uint8_t, Size>& bytes) noexcept
+			{
+				if (write_code_bytes(address, bytes)) return true;
+				const auto error = GetLastError();
+				const auto page = utils::hook_validation::validate_executable_target(
+					reinterpret_cast<const void*>(address));
+				return fail(name, address, "write", [&] {
+					return std::format("write error={} page={} protection=0x{:X}", error,
+						utils::hook_validation::to_string(page.status), page.protection);
+				});
+			}
+
+			template <std::size_t Size>
+			bool match(const char* name, const std::uintptr_t address,
+				const std::array<std::uint8_t, Size>& bytes) noexcept
+			{
+				std::array<std::uint8_t, Size> mask{};
+				mask.fill(0xFF);
+				const auto result = utils::hook_validation::verify_masked_bytes(
+					reinterpret_cast<const void*>(address), {bytes.data(), mask.data(), Size});
+				if (result) return true;
+				return fail(name, address, "match", [&] {
+					return std::format("match status={} offset={} expected={:02X} actual={:02X}",
+						utils::hook_validation::to_string(result.status),
+						result.mismatch_offset == result.no_mismatch ? std::size_t{} : result.mismatch_offset,
+						result.expected, result.actual);
+				});
+			}
+
+			bool check(const char* name, const bool value) noexcept
+			{
+				return value || fail(name, 0, "check", [] { return std::string{}; });
+			}
+
+		private:
+			template <typename Detail>
+			bool fail(const char* name, const std::uintptr_t address, const char* kind, const Detail& detail) noexcept
+			{
+				if (failed) return false;
+				failed = name;
+				try
+				{
+					report = std::format("first failed step: {} {} at +0x{:X}; {}", kind, name,
+						address ? address - 0x140000000 : 0, detail());
+				}
+				catch (...)
+				{
+					report = name;
+				}
+				console::error("[VR]   %s\n", report.c_str());
+				return false;
+			}
+		};
+
+		// Detail of the last incomplete backend rollback, for the startup error.
+		std::string backend_rollback_report;
 
 		bool build_relative_call(const std::uintptr_t call_site, const void* const replacement,
 			std::array<std::uint8_t, 5>& output) noexcept
@@ -2529,7 +2613,7 @@ namespace vr::engine_stereo_renderer
 					// output is at entry RSP+0x68. Replay the displaced global load
 					// before calling C++ so its concurrent-read position is unchanged.
 					a.push(rax);
-					a.mov(rax, h2_query_result_original_global);
+					a.mov(rax, h2_query_result_original_global.get());
 					a.mov(ecx, dword_ptr(rax));
 					a.push(rcx);
 					a.mov(rcx, r14);
@@ -2600,8 +2684,11 @@ namespace vr::engine_stereo_renderer
 				0xE8, 0xD6, 0x7D, 0xFF, 0xFF};
 			constexpr std::array<std::uint8_t, 5> query_publish_bytes{
 				0xE8, 0x36, 0xA6, 0xFA, 0xFF};
-			constexpr std::array<std::uint8_t, 6> query_result_bytes{
-				0x8B, 0x0D, 0xF3, 0x11, 0x4B, 0x00};
+			// mov ecx, [h2_query_result_original_global], encoded for the loaded image.
+			std::array<std::uint8_t, 6> query_result_bytes{0x8B, 0x0D};
+			const auto query_result_displacement = static_cast<std::int32_t>(
+				h2_query_result_original_global.get() - (h2_query_result_observation_site + query_result_bytes.size()));
+			std::memcpy(query_result_bytes.data() + 2, &query_result_displacement, sizeof(query_result_displacement));
 
 			// Restore producers before consumers. No runtime unpatch path calls this;
 			// it is exclusively startup rollback while renderer work is quiescent.
@@ -2665,6 +2752,23 @@ namespace vr::engine_stereo_renderer
 				view_bind && record_classifier &&
 				view_copy && geometry_view_setup && dynamic_upload && postfx_destination && command &&
 				publisher && result && protections && bytes;
+			if (!complete)
+			{
+				try
+				{
+					backend_rollback_report = std::format("rollback hooks(depth/select/prepare)={}{}{} writes(post_bind/"
+						"record/view_bind/classifier/view_copy/geometry/upload/postfx/dispatch/publish/result)="
+						"{}{}{}{}{}{}{}{}{}{}{} protections={} bytes={}", +depth_hack_projection, +target_select,
+						+target_prepare, +post_bind, +backend_record, +view_bind, +record_classifier, +view_copy,
+						+geometry_view_setup, +dynamic_upload, +postfx_destination, +command, +publisher, +result,
+						+protections, +bytes);
+				}
+				catch (...)
+				{
+					backend_rollback_report = "rollback detail unavailable";
+				}
+				console::error("[VR]   %s\n", backend_rollback_report.c_str());
+			}
 			if (complete) backend_hooks.installed = false;
 			return complete;
 		}
@@ -2892,34 +2996,32 @@ namespace vr::engine_stereo_renderer
 			query_result_patch.back() = 0x90;
 
 			// Consumer first, then publisher, then the inner-to-outer backend chain.
-			const auto installed = backend_depth_hack_projection_hook.is_enabled() &&
-				backend_target_prepare_hook.is_enabled() &&
-				backend_target_select_hook.is_enabled() &&
-				write_code_bytes(backend_geometry_view_setup_call_site, geometry_view_setup_patch) &&
-				code_bytes_match(backend_geometry_view_setup_call_site, geometry_view_setup_patch) &&
-				write_code_bytes(postfx_destination_call_site, postfx_destination_patch) &&
-				code_bytes_match(postfx_destination_call_site, postfx_destination_patch) &&
-				write_code_bytes(backend_dynamic_upload_call_site, dynamic_upload_patch) &&
-				code_bytes_match(backend_dynamic_upload_call_site, dynamic_upload_patch) &&
-				write_code_bytes(h2_query_result_observation_site,
-				query_result_patch) && write_code_bytes(h2_query_publish_call_site,
-				query_publish_patch) && write_code_bytes(backend_command_dispatch_call_site,
-				command_dispatch_patch) && write_code_bytes(backend_view_copy_call_site,
-				backend_view_copy_patch) && write_code_bytes(
-				backend_record_classifier_call_site,
-				backend_record_classifier_patch) && write_code_bytes(backend_record_call_site,
-				backend_record_patch) && write_code_bytes(backend_view_bind_call_site,
-				backend_view_bind_patch) && write_code_bytes(backend_post_bind_call_site,
-				post_bind_patch) && code_bytes_match(h2_query_result_observation_site,
-				query_result_patch) && code_bytes_match(h2_query_publish_call_site,
-				query_publish_patch) && code_bytes_match(backend_command_dispatch_call_site,
-				command_dispatch_patch) && code_bytes_match(backend_view_copy_call_site,
-				backend_view_copy_patch) && code_bytes_match(
-				backend_record_classifier_call_site,
-				backend_record_classifier_patch) && code_bytes_match(backend_record_call_site,
-				backend_record_patch) && code_bytes_match(backend_view_bind_call_site,
-				backend_view_bind_patch) && code_bytes_match(backend_post_bind_call_site,
-				post_bind_patch);
+			patch_transaction tx;
+			const auto installed = tx.check("depth_hack_projection_hook", backend_depth_hack_projection_hook.is_enabled()) &&
+				tx.check("target_prepare_hook", backend_target_prepare_hook.is_enabled()) &&
+				tx.check("target_select_hook", backend_target_select_hook.is_enabled()) &&
+				tx.write("geometry_view_setup", backend_geometry_view_setup_call_site, geometry_view_setup_patch) &&
+				tx.match("geometry_view_setup", backend_geometry_view_setup_call_site, geometry_view_setup_patch) &&
+				tx.write("postfx_destination", postfx_destination_call_site, postfx_destination_patch) &&
+				tx.match("postfx_destination", postfx_destination_call_site, postfx_destination_patch) &&
+				tx.write("dynamic_upload", backend_dynamic_upload_call_site, dynamic_upload_patch) &&
+				tx.match("dynamic_upload", backend_dynamic_upload_call_site, dynamic_upload_patch) &&
+				tx.write("query_result", h2_query_result_observation_site, query_result_patch) &&
+				tx.write("query_publish", h2_query_publish_call_site, query_publish_patch) &&
+				tx.write("command_dispatch", backend_command_dispatch_call_site, command_dispatch_patch) &&
+				tx.write("view_copy", backend_view_copy_call_site, backend_view_copy_patch) &&
+				tx.write("record_classifier", backend_record_classifier_call_site, backend_record_classifier_patch) &&
+				tx.write("record", backend_record_call_site, backend_record_patch) &&
+				tx.write("view_bind", backend_view_bind_call_site, backend_view_bind_patch) &&
+				tx.write("post_bind", backend_post_bind_call_site, post_bind_patch) &&
+				tx.match("query_result", h2_query_result_observation_site, query_result_patch) &&
+				tx.match("query_publish", h2_query_publish_call_site, query_publish_patch) &&
+				tx.match("command_dispatch", backend_command_dispatch_call_site, command_dispatch_patch) &&
+				tx.match("view_copy", backend_view_copy_call_site, backend_view_copy_patch) &&
+				tx.match("record_classifier", backend_record_classifier_call_site, backend_record_classifier_patch) &&
+				tx.match("record", backend_record_call_site, backend_record_patch) &&
+				tx.match("view_bind", backend_view_bind_call_site, backend_view_bind_patch) &&
+				tx.match("post_bind", backend_post_bind_call_site, post_bind_patch);
 			if (installed)
 			{
 				backend_hooks.installed = true;
@@ -2931,8 +3033,9 @@ namespace vr::engine_stereo_renderer
 				rollback ? "complete" : "incomplete");
 			if (!rollback)
 			{
-				throw std::runtime_error(
-					"VR backend observation rollback was incomplete; refusing partial H2 code patches");
+				throw std::runtime_error(std::format(
+					"VR backend observation rollback was incomplete; refusing partial H2 code patches\n\n{}\n{}",
+					tx.report, backend_rollback_report));
 			}
 			return false;
 		}
@@ -3229,9 +3332,9 @@ namespace vr::engine_stereo_renderer
 	{
 		const auto backend = engine_backend_probe::get_status();
 		(void)capture_artifact(evidence::captures.baseline_target_registry_artifact,
-			native_render_contract::target_registry_base, {
+			native_render_contract::target_registry_base.get(), {
 				GetTickCount64(),
-				native_render_contract::target_registry_base,
+				native_render_contract::target_registry_base.get(),
 				backend.target_prepare_calls,
 				backend.backend_transactions,
 				backend.frontend_publications,
@@ -3364,7 +3467,7 @@ namespace vr::engine_stereo_renderer
 			hash_memory_region(reinterpret_cast<std::uintptr_t>(output),
 				helper ? camera_globals_size : 0),
 			hash_scene_descriptor_prefix(game::refdef),
-			hash_memory_region(owner_view_globals, owner_view_globals_size),
+			hash_memory_region(owner_view_globals.get(), owner_view_globals_size),
 		};
 
 		if (active_view_transaction != nullptr && active_view_transaction->token)

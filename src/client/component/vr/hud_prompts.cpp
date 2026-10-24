@@ -128,7 +128,7 @@ namespace vr::hud_prompts
 		const auto language=game_text::current();if(!owns_world_text(language))return true;
 		if(!game::CL_IsCgameInitialized() || !hint_contract())return true;
 		unsigned hint{};
-		if(!utils::native_memory::read_bytes(&hint,reinterpret_cast<const void*>(0x141C12978),sizeof(hint)))return true;
+		if(!utils::native_memory::read_bytes(&hint,reinterpret_cast<const void*>(game::build::relocate(0x141C12978)),sizeof(hint)))return true;
 		const auto id=world_message(hint);
 		return id && !compose(*id,language,{-1,true,{}});
 	}

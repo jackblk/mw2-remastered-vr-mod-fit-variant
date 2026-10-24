@@ -2532,10 +2532,27 @@ namespace d3d11
 			current_graphics_status.active_buffer_count = 0;
 		}
 
+		// Variant-port diagnostic: OpenXR frames are only submitted inside H2's Present,
+		// so a long gap starves the headset. Logs gaps and blocking Presents >= 250 ms.
+		constexpr auto present_stall_threshold = std::chrono::milliseconds(250);
+		std::chrono::steady_clock::time_point previous_present_begin{};
+
+		void log_present_stall(const char* const kind, const std::chrono::steady_clock::duration duration,
+			const std::uint64_t frame_index)
+		{
+			SYSTEMTIME now{};
+			GetLocalTime(&now);
+			console::info("[VR diag] %02u:%02u:%02u.%03u Present %s %lld ms (frame %llu)\n",
+				now.wHour, now.wMinute, now.wSecond, now.wMilliseconds, kind,
+				std::chrono::duration_cast<std::chrono::milliseconds>(duration).count(), frame_index);
+		}
+
 		void record_present_result(const std::uint64_t generation, const HRESULT result,
 			const std::chrono::steady_clock::time_point started,
 			const std::chrono::steady_clock::time_point completed)
 		{
+			if (completed - started >= present_stall_threshold)
+				log_present_stall("call blocked", completed - started, 0);
 			const std::lock_guard lock(graphics_mutex);
 			if (current_graphics_status.generation != generation)
 			{
@@ -2563,6 +2580,10 @@ namespace d3d11
 		void record_present_begin(const std::uint64_t generation, const std::uint64_t frame_index,
 			const std::chrono::steady_clock::time_point started, const DWORD thread_id)
 		{
+			if (previous_present_begin != std::chrono::steady_clock::time_point{} &&
+				started - previous_present_begin >= present_stall_threshold)
+				log_present_stall("gap", started - previous_present_begin, frame_index);
+			previous_present_begin = started;
 			const std::lock_guard lock(graphics_mutex);
 			if (current_graphics_status.generation != generation)
 			{

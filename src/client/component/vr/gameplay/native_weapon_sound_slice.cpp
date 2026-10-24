@@ -25,9 +25,9 @@ namespace vr::gameplay::weapons::native_weapon_sound_slice
 		std::atomic<std::uint64_t>* budget(void* source)
 		{
 			const auto address=reinterpret_cast<std::uintptr_t>(source);
-			constexpr std::uintptr_t first=0x14BC7E580+0x28;
-			if(address<first || (address-first)%0x2d8)return nullptr;
-			const auto index=(address-first)/0x2d8;
+			constexpr game::build::data_address first{0x14BC7E580+0x28};
+			if(address<first.get() || (address-first.get())%0x2d8)return nullptr;
+			const auto index=(address-first.get())/0x2d8;
 			return index<budgets.size() ? &budgets[index] : nullptr;
 		}
 		int queue(void* info,int channel,int spatial,int flags)

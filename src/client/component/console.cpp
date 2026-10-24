@@ -12,6 +12,9 @@
 
 #include <utils/thread.hpp>
 #include <utils/hook.hpp>
+#include <utils/nt.hpp>
+
+#include <share.h>
 
 #define OUTPUT_HANDLE GetStdHandle(STD_OUTPUT_HANDLE)
 
@@ -31,6 +34,18 @@ namespace console
 		std::thread output_thread;
 		HANDLE output_event{};
 		std::atomic_bool output_stopping{};
+		std::mutex log_mutex;
+		FILE* log_file{};
+
+		// Mirror every message to overlord.log beside the executable. Written
+		// synchronously so the last lines survive a crash or a fatal dialog.
+		void write_log(const std::string& message)
+		{
+			std::lock_guard _(log_mutex);
+			if (!log_file) return;
+			std::fwrite(message.data(), 1, message.size(), log_file);
+			std::fflush(log_file);
+		}
 
 		struct
 		{
@@ -145,6 +160,7 @@ namespace console
 		int dispatch_message(const int type, const std::string& message)
 		{
 			if(output_stopping.load())return 0;
+			write_log(message);
 			diagnostic_messages.push(type,message,GetTickCount64());
 			output_queue.push(type,message);
 			if(output_event)SetEvent(output_event);
@@ -402,6 +418,12 @@ namespace console
 
 		void post_start() override
 		{
+			{
+				// Game process only; each run starts a fresh log. Others may read it live.
+				const auto log_path = utils::nt::library{}.get_folder() + "/overlord.log";
+				std::lock_guard _(log_mutex);
+				log_file = _fsopen(log_path.data(), "wb", _SH_DENYWR);
+			}
 			output_event=CreateEvent(nullptr,FALSE,FALSE,nullptr);
 			if(!output_event)throw std::runtime_error("Unable to create console output event");
 			output_thread=utils::thread::create_named_thread("Console output",[]

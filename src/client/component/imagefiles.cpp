@@ -39,7 +39,7 @@ namespace imagefiles
 		{
 			if (index != CUSTOM_IMAGE_FILE_INDEX)
 			{
-				return &reinterpret_cast<image_file_unk*>(0x144379510)[index];
+				return &reinterpret_cast<image_file_unk*>(game::build::relocate(0x144379510))[index];
 			}
 
 			const auto name = get_image_file_name();
@@ -57,7 +57,7 @@ namespace imagefiles
 		{
 			if (index != CUSTOM_IMAGE_FILE_INDEX)
 			{
-				return reinterpret_cast<game::DB_IFileSysFile**>(0x14417B500)[index];
+				return reinterpret_cast<game::DB_IFileSysFile**>(game::build::relocate(0x14417B500))[index];
 			}
 
 			const auto name = get_image_file_name();
@@ -104,7 +104,7 @@ namespace imagefiles
 		{
 			if (index != CUSTOM_IMAGE_FILE_INDEX)
 			{
-				return utils::hook::invoke<void*>(0x140622E80, 0x14417B500, count, is_imagefile, index, is_localized);
+				return utils::hook::invoke<void*>(0x140622E80, game::build::relocate(0x14417B500), count, is_imagefile, index, is_localized);
 			}
 
 			const auto name = get_image_file_name();

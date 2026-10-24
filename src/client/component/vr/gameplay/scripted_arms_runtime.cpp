@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "../h2/entrypoints.hpp"
 #include "component/vr/gameplay/hands/rig_builder.hpp"
 #include "component/vr/gameplay/weapon_pose_library.hpp"
@@ -170,7 +171,7 @@ namespace vr::gameplay::scripted_arms
         if(!tracking){reject("body tracking paused or unavailable");return;}
         if(sampled_at!=clock::time_point{} && (input.sampled_at<sampled_at || input.sampled_at-sampled_at>150ms))motion.reset();
         sampled_at=input.sampled_at;
-        const auto* view=*reinterpret_cast<const std::byte* const*>(0x141E39D30);
+        const auto* view=*reinterpret_cast<const std::byte* const*>(game::build::relocate(0x141E39D30));
         if(!view){reject("render origin unavailable");return;}
         vec offset{};std::memcpy(offset.data(),view+0x58,sizeof(offset));
         position_offsets offsets;

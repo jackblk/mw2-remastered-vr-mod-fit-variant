@@ -8,6 +8,7 @@
 #include "game/dvars.hpp"
 
 #include <utils/hook.hpp>
+#include <utils/nt.hpp>
 
 namespace logger
 {
@@ -60,6 +61,25 @@ namespace logger
 				va_end(ap);
 
 				console::error("Error: %s\n", buffer);
+			}
+
+			// Variant-port diagnostic: Com_Error writes no minidump, so log its call stack.
+			// Resolve overlord offsets with `tools/variant_tool.py sym`.
+			{
+				void* frames[48]{};
+				const auto count = RtlCaptureStackBackTrace(0, static_cast<DWORD>(std::size(frames)), frames, nullptr);
+				const auto own_base = reinterpret_cast<std::uintptr_t>(
+					utils::nt::library::get_by_address(reinterpret_cast<void*>(&com_error_stub)).get_ptr());
+				for (USHORT index = 0; index < count; ++index)
+				{
+					const auto address = reinterpret_cast<std::uintptr_t>(frames[index]);
+					if (address >= 0x140000000 && address < 0x152000000)
+						console::info("[VR diag] Com_Error frame %u: h2 0x%llX\n", index, address);
+					else if (address >= own_base && address < own_base + 0x20000000)
+						console::info("[VR diag] Com_Error frame %u: overlord+0x%llX\n", index, address - own_base);
+					else
+						console::info("[VR diag] Com_Error frame %u: 0x%llX\n", index, address);
+				}
 			}
 
 			loadscreen::clear();

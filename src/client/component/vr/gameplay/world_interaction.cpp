@@ -45,7 +45,7 @@ namespace vr::gameplay::interaction
 			std::array<std::uint8_t,sizeof(expected)> mask{};mask.fill(0xff);
 			// Binding identities are verified in addition to the existing jump
 			// adapter's validated reliable-queue entry/callsite.
-			const auto* table=reinterpret_cast<const char* const*>(0x140BF84E0);
+			const auto* table=reinterpret_cast<const char* const*>(game::build::relocate(0x140BF84E0));
 			return table[73] && table[74] && std::string_view(table[73])=="+activate" &&
 				std::string_view(table[74])=="-activate" &&
 				bool(utils::hook_validation::verify_masked_bytes(reinterpret_cast<void*>(0x1403D3A90),{expected,mask.data(),sizeof(expected)}));

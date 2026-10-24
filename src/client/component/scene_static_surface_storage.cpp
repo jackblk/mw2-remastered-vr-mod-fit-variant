@@ -34,7 +34,7 @@ namespace scene_static_surfaces
 		void post_unpack()override
 		{
 			if(!target_identity::get().compatibility_probe_passed)throw std::runtime_error("static surface storage requires verified H2 image");
-			const auto displacement=reinterpret_cast<std::uintptr_t>(banks.data())-scene_surface_storage::native_first_frontend;
+			const auto displacement=reinterpret_cast<std::uintptr_t>(banks.data())-scene_surface_storage::native_first_frontend.get();
 			std::array<std::array<std::uint8_t,8>,operands.size()> replacements{};
 			for(unsigned i=0;i<operands.size();++i)
 			{

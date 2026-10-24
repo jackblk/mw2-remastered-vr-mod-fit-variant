@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "component/vr/native_render_contract.hpp"
 #include "engine_stereo_gpu_census.hpp"
 
@@ -1765,8 +1766,7 @@ namespace vr::engine_stereo_gpu_census
 			return static_cast<std::size_t>(family);
 		}
 
-		constexpr std::uintptr_t h2_dynamic_fx_global_data_pointer =
-			0x150F91188ull;
+		constexpr game::build::data_address h2_dynamic_fx_global_data_pointer{0x150F91188ull};
 		constexpr std::size_t h2_dynamic_fx_mesh_bytes = 0x38;
 		static_assert(h2_dynamic_fx_mesh_bytes ==
 			dynamic_fx_arena_raw_qword_count * sizeof(std::uint64_t));
@@ -3932,7 +3932,7 @@ namespace vr::engine_stereo_gpu_census
 		if (observation_thread_id.load(std::memory_order_acquire) == 0) return;
 		std::lock_guard lock(census_mutex);
 		observe_dynamic_fx_arena_boundary_locked(pair_id, output, phase,
-			owner_record, h2_dynamic_fx_global_data_pointer, backend_state);
+			owner_record, h2_dynamic_fx_global_data_pointer.get(), backend_state);
 	}
 
 	void note_dynamic_fx_arena_boundary_for_test(const std::uint64_t pair_id,

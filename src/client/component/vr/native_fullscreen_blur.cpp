@@ -42,7 +42,7 @@ namespace vr::native_fullscreen_blur
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> target(std::uint32_t id)
 		{
 			game::GfxImage* image{};ID3D11RenderTargetView* view{};
-			const auto* entry=reinterpret_cast<const std::byte*>(native_render_contract::target_registry_base+
+			const auto* entry=reinterpret_cast<const std::byte*>(native_render_contract::target_registry_base.get()+
 				id*native_render_contract::target_registry_stride);
 			std::memcpy(&image,entry,sizeof(image));std::memcpy(&view,entry+sizeof(void*),sizeof(view));
 			Microsoft::WRL::ComPtr<ID3D11Resource> resource,output;
@@ -63,7 +63,7 @@ namespace vr::native_fullscreen_blur
 		float radius{};std::memcpy(&radius,static_cast<const std::byte*>(record)+0x234,sizeof(radius));
 		if(!std::isfinite(radius) || radius<0)return reject("invalid native blur radius");
 		last_radius=radius;
-		const auto* enabled=*reinterpret_cast<const game::dvar_t* const*>(0x14EE3A8A8);
+		const auto* enabled=*reinterpret_cast<const game::dvar_t* const*>(game::build::relocate(0x14EE3A8A8));
 		if(!enabled || !enabled->current.enabled || !utils::hook::invoke<bool>(0x1407B0E60,record))
 		{++skipped;reason="native blur inactive";return true;}
 		try

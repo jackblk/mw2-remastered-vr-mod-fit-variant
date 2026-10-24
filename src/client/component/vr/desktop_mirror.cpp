@@ -196,7 +196,7 @@ namespace vr::desktop_mirror
 		resources.context->OMGetRenderTargets(1, &target, nullptr);
 		ID3D11RenderTargetView* desktop_target{};
 		std::memcpy(&desktop_target, reinterpret_cast<const void*>(
-			native_render_contract::target_registry_base + native_render_contract::target_registry_stride + 8),
+			native_render_contract::target_registry_base.get() + native_render_contract::target_registry_stride + 8),
 			sizeof(desktop_target));
 		D3D11_RENDER_TARGET_VIEW_DESC description{};
 		if (target) target->GetDesc(&description);

@@ -17,7 +17,8 @@ namespace vr::gameplay::native_fx::checkpoint
 		constexpr std::uintptr_t find_address = 0x140446C90;
 		constexpr std::uintptr_t read_particles = 0x140429930;
 		constexpr std::uintptr_t release_reference = 0x1404553B0, collect_garbage = 0x140457620;
-		constexpr std::uintptr_t native_definitions = 0x14439C690, native_count = 0x1443A0690;
+		constexpr game::build::data_address native_definitions{0x14439C690};
+		constexpr game::build::data_address native_count{0x1443A0690};
 		utils::hook::detour prepare_hook;
 		registry definitions;
 		std::mutex mutex;
@@ -38,9 +39,9 @@ namespace vr::gameplay::native_fx::checkpoint
 			bool appended{};
 			{
 				const std::lock_guard lock(mutex);
-				auto& count = *reinterpret_cast<unsigned*>(native_count);
+				auto& count = *reinterpret_cast<unsigned*>(native_count.get());
 				auto size = static_cast<std::size_t>(count);
-				appended = definitions.append({reinterpret_cast<game::FxEffectDef**>(native_definitions), native_capacity}, size);
+				appended = definitions.append({reinterpret_cast<game::FxEffectDef**>(native_definitions.get()), native_capacity}, size);
 				if (appended) { saved_variants += definitions.size(); count = static_cast<unsigned>(size); }
 			}
 			if (!appended) { reject("definition dictionary capacity"); return; }
