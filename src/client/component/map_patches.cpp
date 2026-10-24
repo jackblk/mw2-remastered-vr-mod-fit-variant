@@ -55,7 +55,7 @@ namespace map_patches
 	utils::hook::detour r_filter_things_into_cells_r_hook;
 	void r_filter_things_into_cells_r_stub(void* node, unsigned int dyn_ent_index, game::Bounds* bounds, unsigned int* cell_bits, unsigned int word_count)
 	{
-		const auto gfx_world = *reinterpret_cast<size_t*>(0x14EE49000);
+		const auto gfx_world = *reinterpret_cast<size_t*>(game::build::relocate(0x14EE49000));
 		const auto bsp_version = *reinterpret_cast<unsigned int*>(gfx_world + 16);
 		if (bsp_version == 115) // h2 bsp version
 		{

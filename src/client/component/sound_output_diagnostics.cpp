@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "sound_output_diagnostics.hpp"
 #include "loader/component_loader.hpp"
 #include "console.hpp"
@@ -37,8 +38,8 @@ namespace sound::output_diagnostics
 			// H2 SND_InitDriver / WASAPI Start retain these objects. Observe only
 			// after their original calls, on the same native owner thread. Never
 			// cache COM pointers or query them from vr_status / the async writer.
-			auto* device = *reinterpret_cast<IMMDevice* const*>(0x14BDF0658);
-			auto* client = *reinterpret_cast<IAudioClient* const*>(0x14BDF0620);
+			auto* device = *reinterpret_cast<IMMDevice* const*>(game::build::relocate(0x14BDF0658));
+			auto* client = *reinterpret_cast<IAudioClient* const*>(game::build::relocate(0x14BDF0620));
 			std::ostringstream out;
 			out << "audio_output: stage=" << stage << " start_result=" << started
 				<< " pid=" << GetCurrentProcessId() << " tick=" << GetTickCount64()

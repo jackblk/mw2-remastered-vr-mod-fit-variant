@@ -18,18 +18,19 @@ namespace vr::native_post_aa
 	namespace
 	{
 		constexpr std::uintptr_t dispatch_address = 0x140296EB0;
-		constexpr std::uintptr_t frame_address = 0x14EEE0C9C;
-		constexpr std::uintptr_t progress_address = 0x14EEE0CA0;
+		constexpr game::build::data_address frame_address{0x14EEE0C9C};
+		constexpr game::build::data_address progress_address{0x14EEE0CA0};
 		constexpr std::uintptr_t temporal_frame_read = 0x1402970DF, filmic_frame_read = 0x14029737B;
-		constexpr std::uint8_t temporal_frame_bytes[]{0x8B,0x0D,0xB7,0x9B,0xC4,0x0E};
-		constexpr std::uint8_t filmic_frame_bytes[]{0x8B,0x05,0x1B,0x99,0xC4,0x0E};
+		// Restore the loaded image's own MOVs; their displacements are build-specific.
+		std::uint8_t temporal_frame_bytes[6]{};
+		std::uint8_t filmic_frame_bytes[6]{};
 		std::atomic_bool frame_reads_installed{};
 		struct frame_override { bool active{}; std::uint32_t phase{}; };
 		thread_local frame_override current_frame{};
 		std::uint32_t read_frame() noexcept
 		{
 			return current_frame.active ? current_frame.phase :
-				*reinterpret_cast<const std::uint32_t*>(frame_address);
+				*reinterpret_cast<const std::uint32_t*>(frame_address.get());
 		}
 		struct native_progress { std::uint32_t last_frame{}, consecutive{}; };
 		static_assert(sizeof(native_progress) == 8);
@@ -99,7 +100,7 @@ namespace vr::native_post_aa
 		ID3D11RenderTargetView* target_view(std::uint32_t id) noexcept
 		{
 			ID3D11RenderTargetView* result{};
-			std::memcpy(&result, reinterpret_cast<const void*>(native_render_contract::target_registry_base +
+			std::memcpy(&result, reinterpret_cast<const void*>(native_render_contract::target_registry_base.get() +
 				id * native_render_contract::target_registry_stride + sizeof(void*)), sizeof(result));
 			return result;
 		}
@@ -108,7 +109,7 @@ namespace vr::native_post_aa
 			Microsoft::WRL::ComPtr<ID3D11Resource> resource, sampled;
 			Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
 			game::GfxImage* image{};
-			std::memcpy(&image, reinterpret_cast<const void*>(native_render_contract::target_registry_base +
+			std::memcpy(&image, reinterpret_cast<const void*>(native_render_contract::target_registry_base.get() +
 				id * native_render_contract::target_registry_stride), sizeof(image));
 			auto* view = target_view(id);
 			if (view) view->GetResource(&resource);
@@ -138,7 +139,7 @@ namespace vr::native_post_aa
 		diagnostics::post_aa::target observe_target(const std::uint32_t id)
 		{
 			game::GfxImage* image{};
-			std::memcpy(&image, reinterpret_cast<const void*>(native_render_contract::target_registry_base +
+			std::memcpy(&image, reinterpret_cast<const void*>(native_render_contract::target_registry_base.get() +
 				id * native_render_contract::target_registry_stride), sizeof(image));
 			return diagnostics::post_aa::observe(id, image, image ? image->texture.map : nullptr,
 				target_view(id), image ? image->texture.shaderView : nullptr);
@@ -249,7 +250,7 @@ namespace vr::native_post_aa
 				histories.committed = {};
 				histories.revision = revision;
 			}
-			const auto frame = *reinterpret_cast<const std::uint32_t*>(frame_address);
+			const auto frame = *reinterpret_cast<const std::uint32_t*>(frame_address.get());
 			if (histories.pending_pair != view.pair)
 			{
 				if (histories.pending_pair) histories.committed = {};
@@ -296,7 +297,7 @@ namespace vr::native_post_aa
 				}
 				seeds.fetch_add(1, std::memory_order_relaxed);
 			}
-			auto* progress = reinterpret_cast<native_progress*>(progress_address);
+			auto* progress = reinterpret_cast<native_progress*>(progress_address.get());
 			const auto natural_progress = *progress;
 			const auto restore_progress = gsl::finally([&] { *progress = natural_progress; });
 			*progress = next.progress;
@@ -314,12 +315,12 @@ namespace vr::native_post_aa
 					display_input_target, filmic_scratch_target, route.destination);
 			};
 			ID3D11DepthStencilView* scene_depth{};
-			std::memcpy(&scene_depth, reinterpret_cast<const void*>(native_render_contract::target_registry_base +
+			std::memcpy(&scene_depth, reinterpret_cast<const void*>(native_render_contract::target_registry_base.get() +
 				4 * native_render_contract::target_registry_stride + 2 * sizeof(void*)), sizeof(scene_depth));
 			const bool drawn = selected >= mode::smaa && selected <= mode::filmic_smaa_t2x ?
 				histories.depth.preserve(graphics.context.Get(), scene_depth, draw) : draw();
 			if (!drawn) return reject("native_dispatch");
-			if (*reinterpret_cast<const std::uint32_t*>(frame_address) != frame)
+			if (*reinterpret_cast<const std::uint32_t*>(frame_address.get()) != frame)
 				return reject("native_frame_changed");
 			next.progress = *progress;
 			histories.pending[view.eye] = next;
@@ -369,6 +370,8 @@ namespace vr::native_post_aa
 		void post_unpack() override
 		{
 			if (!native_contract()) { reject("native_contract"); return; }
+			std::memcpy(temporal_frame_bytes, reinterpret_cast<const void*>(temporal_frame_read), sizeof(temporal_frame_bytes));
+			std::memcpy(filmic_frame_bytes, reinterpret_cast<const void*>(filmic_frame_read), sizeof(filmic_frame_bytes));
 			// Install before native rendering starts. Each relay preserves the
 			// original MOV's register contract and reads native time outside AA.
 			auto* temporal = utils::hook::create_preserving_near_jump(temporal_frame_read,

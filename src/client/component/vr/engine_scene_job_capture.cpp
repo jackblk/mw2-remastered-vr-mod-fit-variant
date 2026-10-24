@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "engine_scene_job_capture.hpp"
 #include "debug_options.hpp"
 #include "loader/target_identity.hpp"
@@ -12,8 +13,8 @@ namespace vr::engine_scene_job_capture
 	{
 		constexpr std::uintptr_t wait_function = 0x140793DE0;
 		constexpr std::uintptr_t producer_function = 0x14077FB10;
-		constexpr std::uintptr_t backend_frontend = 0x151A7F3B0;
-		constexpr std::uintptr_t producer_frontend = 0x150F91188;
+		constexpr game::build::data_address backend_frontend{0x151A7F3B0};
+		constexpr game::build::data_address producer_frontend{0x150F91188};
 		using wait_fn = std::uintptr_t(*)(void*, std::uint32_t);
 		using producer_fn = std::uintptr_t(*)(void*, void*, void*, void*, void*);
 
@@ -24,7 +25,7 @@ namespace vr::engine_scene_job_capture
 			// position. In particular, do not move later waits before GPU setup.
 			if (!region_capture::enabled())
 				return reinterpret_cast<wait_fn>(wait_function)(predicate, process_jobs);
-			const auto frontend = *reinterpret_cast<const std::uintptr_t*>(backend_frontend);
+			const auto frontend = *reinterpret_cast<const std::uintptr_t*>(backend_frontend.get());
 			region_capture::phase_scope timing(Point, predicate, frontend);
 			checkpoint(nullptr, frontend, Point);
 			const auto result = reinterpret_cast<wait_fn>(wait_function)(predicate, process_jobs);
@@ -38,7 +39,7 @@ namespace vr::engine_scene_job_capture
 		{
 			if (!region_capture::enabled())
 				return reinterpret_cast<producer_fn>(producer_function)(record, scene, camera, descriptors, headers);
-			const auto frontend = *reinterpret_cast<const std::uintptr_t*>(producer_frontend);
+			const auto frontend = *reinterpret_cast<const std::uintptr_t*>(producer_frontend.get());
 			region_capture::phase_scope timing(region_capture::phase::surface_producer, record, frontend);
 			checkpoint(record, frontend, region_capture::phase::surface_producer);
 			// Five pointer arguments recovered from 0x140778CF2, including the

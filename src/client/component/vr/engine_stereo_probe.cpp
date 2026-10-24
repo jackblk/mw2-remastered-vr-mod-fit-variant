@@ -1,6 +1,7 @@
 #include <std_include.hpp>
 
 #include "engine_stereo_probe.hpp"
+#include "game/build.hpp"
 
 #include <atomic>
 #include <bit>
@@ -128,12 +129,16 @@ namespace vr::engine_stereo_probe
 
 	void configure_target(const target_descriptor& descriptor) noexcept
 	{
-		constexpr std::string_view expected_original_hash =
-			"9D554376FBE78248A423F6B776634453142FAFA1218645CD64B2499967512AAE";
-		constexpr std::string_view expected_loaded_hash =
-			"58CB70D63E05DC239997420C3ED91F04D3D324AF0BDF8A9623F1012164E0ED9D";
-		constexpr std::uint32_t expected_timestamp = 0x6023ED08;
-		constexpr std::uint32_t expected_image_size = 0x11E6BC00;
+		// The accessibility variant is stored decrypted, so its original and loaded hashes match.
+		const bool variant = game::build::get() == game::build::id::accessibility_variant;
+		const std::string_view expected_original_hash = variant
+			? "B0B9909199051ECF1E24A56F6A6F93F47364549F32164F7698DB789D271D8C57"
+			: "9D554376FBE78248A423F6B776634453142FAFA1218645CD64B2499967512AAE";
+		const std::string_view expected_loaded_hash = variant
+			? "B0B9909199051ECF1E24A56F6A6F93F47364549F32164F7698DB789D271D8C57"
+			: "58CB70D63E05DC239997420C3ED91F04D3D324AF0BDF8A9623F1012164E0ED9D";
+		const std::uint32_t expected_timestamp = variant ? 0x5EAB60CD : 0x6023ED08;
+		const std::uint32_t expected_image_size = variant ? 0x11E6B200 : 0x11E6BC00;
 
 		const bool fingerprint_matches = hash_equals(descriptor.original_sha256, expected_original_hash) &&
 			hash_equals(descriptor.loaded_sha256, expected_loaded_hash) &&

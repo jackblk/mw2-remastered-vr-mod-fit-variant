@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "scene_model_lighting_policy.hpp"
 #include "scene_model_lighting_bridge.hpp"
 #include "console.hpp"
@@ -58,7 +59,7 @@ namespace scene_model_lighting
 			// partition offset. An out-of-range handle is a cache miss, not an
 			// index: let the native allocator rebuild it before any buffer access.
 			const auto reuse_bridge=utils::hook::assemble([](auto& a) {
-				emit_dynamic_handle_guard(a,0x14EF0B384,
+				emit_dynamic_handle_guard(a,game::build::relocate(0x14EF0B384),
 					std::uintptr_t{0x14075D03B},std::uintptr_t{0x14075D19D});
 			});
 			const auto reuse_relay=reuse_bridge?utils::hook::create_preserving_near_jump(reuse_site,reuse_bridge):nullptr;

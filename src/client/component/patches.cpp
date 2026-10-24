@@ -44,7 +44,7 @@ namespace patches
 		void vid_restart_stub()
 		{
 			// free stuff
-			*reinterpret_cast<void**>(0x141E584D8) = nullptr; // free material
+			*reinterpret_cast<void**>(game::build::relocate(0x141E584D8)) = nullptr; // free material
 			utils::hook::invoke<void>(0x1406926B0); // free scripted viewmodel xanim stuff
 			utils::hook::invoke<void>(0x14032A540); // properly free lui memory
 

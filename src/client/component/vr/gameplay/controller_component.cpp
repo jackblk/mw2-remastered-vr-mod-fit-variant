@@ -62,8 +62,8 @@ namespace vr::controllers
 		constexpr std::uintptr_t notify_command_address = 0x1403D3A90;
 		constexpr int jump_binding = 37; // Native whitelist: +gostand.
 		constexpr int sprint_binding = 83; // Native whitelist: +sprint.
-		constexpr std::uintptr_t client_angles_address = 0x141E8A65C;
-		constexpr std::uintptr_t client_yaw_address = 0x141E8A660;
+		constexpr game::build::data_address client_angles_address{0x141E8A65C};
+		constexpr game::build::data_address client_yaw_address{0x141E8A660};
 		utils::hook::detour create_command_hook;
 		game::dvar_t* enabled{};
 		game::dvar_t* deadzone{};
@@ -81,7 +81,7 @@ namespace vr::controllers
 		controller_input::stance_gesture stance;
 		bool stance_verified{};
 		constexpr std::uintptr_t execute_binding_address=0x1403CF1E0;
-		constexpr std::uintptr_t native_stance_address=0x141E8A61C;
+		constexpr game::build::data_address native_stance_address{0x141E8A61C};
 		std::atomic<std::uint64_t> stance_count{};
 		gameplay::sequences::actions story_actions;
 		gameplay::sentry::placement_input sentry_placement;
@@ -126,7 +126,7 @@ namespace vr::controllers
 			constexpr std::array<std::uint32_t,2> hashes{0x75a9d11a,0xcf6fd58b};
 			for(unsigned i=0;i<2;++i)
 			{
-				const auto* value=*reinterpret_cast<const game::dvar_t* const*>(0x14CE00E30+i*8);
+				const auto* value=*reinterpret_cast<const game::dvar_t* const*>(game::build::relocate(0x14CE00E30)+i*8);
 				if(!value || std::uint32_t(value->hash)!=hashes[i] || value->type!=game::dvar_type::value)return {};
 				result[i]=value->current.value;
 			}
@@ -177,7 +177,7 @@ namespace vr::controllers
 				remote_allowed=allowed && input.focused;
 				stick=remote_locomotion.consume(input,remote,remote_input_seen,remote_allowed,turn_deadzone->current.value,controller_input::clock::now());
 				if(remote && !remote_allowed)head_pose_bridge::suspend_remote_view();
-				gameplay::fixed_sniper::command(input,allowed,cmd,reinterpret_cast<float*>(client_angles_address),
+				gameplay::fixed_sniper::command(input,allowed,cmd,reinterpret_cast<float*>(client_angles_address.get()),
 					deadzone->current.value,turn_speed->current.value);
 			}
 			// The native CreateCmd pitch clamp and other input sources run after
@@ -192,7 +192,7 @@ namespace vr::controllers
 				{
 					const auto request=gameplay::sequences::camera_request_for(gameplay::sequences::for_player(ps),sniper,mounted_camera,remote);
 					remote_epoch=remote?request.epoch:0;
-					auto* angles=reinterpret_cast<float*>(client_angles_address);
+					auto* angles=reinterpret_cast<float*>(client_angles_address.get());
 					const bool view_input=!remote || (normal_input_seen && remote_allowed);
 					if(remote && view_input)
 					{
@@ -248,7 +248,7 @@ namespace vr::controllers
 				++movement_count;
 			if (can_turn && movement.yaw_delta != 0)
 			{
-				auto& yaw = *reinterpret_cast<float*>(client_yaw_address);
+				auto& yaw = *reinterpret_cast<float*>(client_yaw_address.get());
 				if (std::isfinite(yaw))
 				{
 					yaw = std::remainder(yaw + movement.yaw_delta, 360.0f);
@@ -297,7 +297,7 @@ namespace vr::controllers
 			{
 				// Reuse H2's own input-stance commands, not playerState writes or
 				// forced pose bits. Native movement retains clearance/script authority.
-				const int binding=controller_input::stance_binding(*posture_command.target,*reinterpret_cast<const int*>(native_stance_address));
+				const int binding=controller_input::stance_binding(*posture_command.target,*reinterpret_cast<const int*>(native_stance_address.get()));
 				if(binding){utils::hook::invoke<void>(execute_binding_address,building_client,binding,0,0u);++stance_count;}
 			}
 			if(posture_command.suppress_jump)button_mask&=~controller_input::jump_button;
@@ -489,7 +489,7 @@ namespace vr::controllers
 						  input.squeeze[0].down, input.squeeze[1].active, input.squeeze[1].down);
 			const auto* ps=game::CL_IsCgameInitialized()?game::CG_GetPredictedPlayerState(0):nullptr;
 			console::info("[VR input] stance_verified=%d requests=%llu requested=%d actual=%d vertical=0.90 lateral_limit=none dwell_ms=0 repeat_ms=450\n",
-				stance_verified,stance_count.load(),stance_verified && ps ? *reinterpret_cast<const int*>(native_stance_address):-1,
+				stance_verified,stance_count.load(),stance_verified && ps ? *reinterpret_cast<const int*>(native_stance_address.get()):-1,
 					ps ? int(controller_input::native_posture(ps->pm_flags)):-1);
 			std::ostringstream history_report;
 			diagnostics::append_input_history(history_report,controller_input::get_input_history(),

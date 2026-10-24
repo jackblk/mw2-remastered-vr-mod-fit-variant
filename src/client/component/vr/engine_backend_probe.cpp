@@ -542,7 +542,7 @@ namespace vr::engine_backend_probe
 		{
 			const auto cached = target_registry_state.load(std::memory_order_acquire);
 			if (cached != 0) return cached > 0;
-			const auto readable = readable_range(native_render_contract::target_registry_base,
+			const auto readable = readable_range(native_render_contract::target_registry_base.get(),
 				native_render_contract::target_registry_capacity * native_render_contract::target_registry_stride);
 			const auto result = readable ? 1 : -1;
 			int expected{};
@@ -574,7 +574,7 @@ namespace vr::engine_backend_probe
 				return result;
 			}
 
-			result.entry = native_render_contract::target_registry_base +
+			result.entry = native_render_contract::target_registry_base.get() +
 				static_cast<std::uintptr_t>(target_id) * native_render_contract::target_registry_stride;
 			result.qword_0 = read_value<std::uintptr_t>(result.entry + target_qword_0_offset);
 			result.qword_1 = read_value<std::uintptr_t>(result.entry + target_qword_1_offset);
@@ -744,7 +744,7 @@ namespace vr::engine_backend_probe
 		{
 			return false;
 		}
-		const auto address = native_render_contract::target_registry_base +
+		const auto address = native_render_contract::target_registry_base.get() +
 			static_cast<std::uintptr_t>(target_id) * native_render_contract::target_registry_stride;
 		std::memcpy(output.data(), reinterpret_cast<const void*>(address), output.size());
 		return true;

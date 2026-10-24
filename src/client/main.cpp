@@ -2,6 +2,7 @@
 #include "launcher/launcher.hpp"
 #include "launcher/vr_settings.hpp"
 #include "launcher/launch_process.hpp"
+#include "component/console.hpp"
 #include "component/game_data.hpp"
 #include "loader/loader.hpp"
 #include "loader/component_loader.hpp"
@@ -54,6 +55,7 @@ namespace
 			}
 			catch (const std::exception& e)
 			{
+				console::error("%s\n", e.what());
 				MessageBoxA(nullptr, e.what(), "ERROR", MB_ICONERROR);
 				exit_hook(1);
 			}
@@ -80,7 +82,7 @@ namespace
 	void apply_aslr_patch(std::string* data)
 	{
 		// sp binary
-		if (data->size() != game_data::supported_binary_size)
+		if (!game_data::is_supported_binary_size(data->size()))
 		{
 			throw std::runtime_error("File size mismatch, bad game files");
 		}
@@ -169,8 +171,18 @@ namespace
 
 	void verify_version()
 	{
+		// The official image stores this code Arxan-encrypted on disk; the
+		// accessibility variant stores it decrypted. Both share one code layout.
 		const auto value = *reinterpret_cast<DWORD*>(0x140123456);
-		if (value != 0xE465E151)
+		if (value == 0xE465E151)
+		{
+			game::build::set(game::build::id::official);
+		}
+		else if (value == 0x0FE4158D)
+		{
+			game::build::set(game::build::id::accessibility_variant);
+		}
+		else
 		{
 			throw std::runtime_error("Unsupported Call of Duty: Modern Warfare 2 Campaign Remastered version");
 		}
@@ -283,6 +295,7 @@ int main()
 		}
 		catch (std::exception& e)
 		{
+			console::error("%s\n", e.what());
 			MessageBoxA(nullptr, e.what(), "ERROR", MB_ICONERROR);
 			return 1;
 		}

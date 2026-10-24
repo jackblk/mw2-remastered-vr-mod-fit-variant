@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "game/build.hpp"
+
 namespace vr::native_render_contract
 {
 	// These offsets belong to the fingerprint-gated H2 renderer build.  Every
@@ -19,7 +21,7 @@ namespace vr::native_render_contract
 	inline constexpr std::uintptr_t dynamic_light_descriptors_offset = 0x541C08;
 	inline constexpr std::uintptr_t dynamic_light_descriptor_count_offset = 0x542588;
 	inline constexpr std::size_t maximum_dynamic_light_descriptors = 8;
-	inline constexpr std::uintptr_t target_registry_base = 0x150FD1700;
+	inline constexpr game::build::data_address target_registry_base{0x150FD1700};
 	inline constexpr std::uintptr_t target_registry_stride = 0x40;
 	inline constexpr std::uint32_t target_registry_capacity = 304;
 	inline constexpr std::size_t target_registry_size =

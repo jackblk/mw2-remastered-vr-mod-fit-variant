@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 
 // Temporary CPU-only provenance probe. No exported asset, shader replacement,
 // GPU queries/readback, render-state writes, or native waits. Release omits it.
@@ -114,7 +115,7 @@ namespace vr::diagnostics::native_flare_probe
 				if (read(s.vertices, mapped + std::uintptr_t(before_vertices) * stride)) s.validity |= 2;
 				if (read(s.vertex_buffer, descriptor + 0x28)) s.validity |= 4;
 				// Exact native 24-byte flare list appended by the observed emission.
-				const auto element = 0x151392180ull + std::uintptr_t(before_elements) * 24;
+				const auto element = game::build::relocate(0x151392180ull) + std::uintptr_t(before_elements) * 24;
 				if (read(s.material, element) && read(s.first_surface, element + 8)) s.validity |= 8;
 				label(s);
 			}
@@ -139,7 +140,7 @@ namespace vr::diagnostics::native_flare_probe
 				read(s.native_view, source + 0x2BF0)) s.validity |= 1;
 			s.context = source;
 			// The draw's own backend arena, not a mutable frontend/latest pointer.
-			if (read(s.data, 0x151A7F3B0ull) && s.data && read(surfaces, s.record + 0x2EA4) &&
+			if (read(s.data, game::build::relocate(0x151A7F3B0ull)) && s.data && read(surfaces, s.record + 0x2EA4) &&
 				surfaces[0] < 4096 && surfaces[1] <= 4096 - surfaces[0])
 			{
 				s.mesh = s.data + 0x540C80; s.element_count = surfaces[1];

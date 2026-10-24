@@ -160,7 +160,7 @@ namespace vr::gameplay::weapons::optics
 			// This native public scale is independent of CG's thermal fade. Read
 			// once for the admitted pair; never set either global control or replay
 			// script/vision state on a renderer or native worker thread.
-			const auto* scale = *reinterpret_cast<game::dvar_t**>(0x14EE3ABE8);
+			const auto* scale = *reinterpret_cast<game::dvar_t**>(game::build::relocate(0x14EE3ABE8));
 			if (!scale || std::uint32_t(scale->hash) != 0xABCCE045 || scale->type != game::value ||
 			    !thermal_scene::valid_scale(scale->current.value))
 				return {};

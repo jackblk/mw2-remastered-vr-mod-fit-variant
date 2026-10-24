@@ -185,7 +185,7 @@ namespace gsc
 			}
 
 			console::warn("******* script runtime error ********\n");
-			const auto opcode_id = *reinterpret_cast<std::uint8_t*>(0x14BAA93E8);
+			const auto opcode_id = *reinterpret_cast<std::uint8_t*>(game::build::relocate(0x14BAA93E8));
 
 			const std::string error = gsc_error_msg.has_value() ? std::format(": {}", gsc_error_msg.value()) : std::string();
 

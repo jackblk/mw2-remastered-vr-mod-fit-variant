@@ -20,7 +20,7 @@ namespace vr::gameplay::weapons::native_ballistics
 	{
 		bool verified{};
 		thread_local bool emitting{};
-		constexpr std::uintptr_t definitions = 0x14CE01580;
+		constexpr game::build::data_address definitions{0x14CE01580};
 		template <std::size_t N> bool verify(std::uintptr_t address, const std::uint8_t (&bytes)[N])
 		{
 			std::array<std::uint8_t,N> mask{}; mask.fill(0xff);
@@ -117,7 +117,7 @@ namespace vr::gameplay::weapons::native_ballistics
 		parameters packet{};
 		packet.shot=geometry;
 		packet.weapon=weapon;
-		packet.definition=reinterpret_cast<void* const*>(definitions)[weapon];
+		packet.definition=reinterpret_cast<void* const*>(definitions.get())[weapon];
 		const auto spread=utils::hook::invoke<float>(ads_spread_address,ps,weapon,false,0);
 		out.status=outcome::unsupported_weapon;
 		if (!packet.definition || !std::isfinite(spread) || spread<0 || spread>90) return out;

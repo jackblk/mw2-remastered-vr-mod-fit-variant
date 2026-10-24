@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "loader/component_loader.hpp"
 #include "scheduler.hpp"
 
@@ -43,7 +44,7 @@ namespace notifies
 
 		char* get_program_buffer()
 		{
-			return *reinterpret_cast<char**>(0x14B5E0B78);
+			return *reinterpret_cast<char**>(game::build::relocate(0x14B5E0B78));
 		}
 
 		size_t get_program_buffer_offset(const char* pos)
@@ -162,7 +163,7 @@ namespace notifies
 
 		std::string convert_mod(const int meansOfDeath)
 		{
-			const auto value = reinterpret_cast<game::scr_string_t**>(0x140BF49B0)[meansOfDeath];
+			const auto value = reinterpret_cast<game::scr_string_t**>(game::build::relocate(0x140BF49B0))[meansOfDeath];
 			return game::SL_ConvertToString(*value);
 		}
 
@@ -171,7 +172,7 @@ namespace notifies
 			unsigned int a11, const int hit_loc, unsigned int a13, unsigned int a14)
 		{
 			{
-				const std::string hit_loc_str = reinterpret_cast<const char**>(0x140BF4AA0)[hit_loc];
+				const std::string hit_loc_str = reinterpret_cast<const char**>(game::build::relocate(0x140BF4AA0))[hit_loc];
 				const auto mod_str = convert_mod(means_of_death);
 				const auto weapon_str = get_weapon_name(weapon, is_alternate);
 

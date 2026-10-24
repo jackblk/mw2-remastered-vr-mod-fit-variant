@@ -204,7 +204,7 @@ namespace loadscreen
 
 		bool in_loadscreen()
 		{
-			return *reinterpret_cast<int*>(0x14203F3C4) == 4;
+			return *reinterpret_cast<int*>(game::build::relocate(0x14203F3C4)) == 4;
 		}
 
 		void ui_set_active_menu_stub(utils::hook::assembler& a)
@@ -216,7 +216,7 @@ namespace loadscreen
 			a.cmp(al, 1);
 			a.jz(player_start);
 
-			a.mov(rax, qword_ptr(static_cast<uint64_t>(0x14BE6EA10)));
+			a.mov(rax, qword_ptr(static_cast<uint64_t>(game::build::relocate(0x14BE6EA10))));
 			a.mov(al, byte_ptr(rax, 0x10));
 			a.cmp(al, 1);
 			a.jz(player_start);
@@ -231,11 +231,15 @@ namespace loadscreen
 
 	void clear()
 	{
-		game::Dvar_Reset(cl_enable_custom_loadscreen, game::DVAR_SOURCE_INTERNAL);
-		game::Dvar_Reset(cl_disable_map_movies, game::DVAR_SOURCE_INTERNAL);
-		game::Dvar_Reset(cl_loadscreen_image, game::DVAR_SOURCE_INTERNAL);
-		game::Dvar_Reset(cl_loadscreen_title, game::DVAR_SOURCE_INTERNAL);
-		game::Dvar_Reset(cl_loadscreen_desc, game::DVAR_SOURCE_INTERNAL);
+		// Com_Error can fire before the scheduler::once registration of the string dvars
+		for (auto* dvar : {cl_enable_custom_loadscreen, cl_disable_map_movies, cl_loadscreen_image,
+			cl_loadscreen_title, cl_loadscreen_desc})
+		{
+			if (dvar != nullptr)
+			{
+				game::Dvar_Reset(dvar, game::DVAR_SOURCE_INTERNAL);
+			}
+		}
 	}
 
 	class component final : public component_interface

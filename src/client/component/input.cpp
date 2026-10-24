@@ -122,7 +122,7 @@ namespace input
 			if(vr_owned[key])return true;
 			// CL_KeyEvent owns this native key state. A held physical key cannot
 			// be borrowed by VR, and its later release must remain physical-owned.
-			if(*reinterpret_cast<const int*>(0x141e87684+key*12))return false;
+			if(*reinterpret_cast<const int*>(game::build::relocate(0x141e87684)+key*12))return false;
 			vr_owned[key]=true;cl_key_event_hook.invoke<void>(0,key,1);return true;
 		}
 		if(vr_owned[key]){vr_owned[key]=false;cl_key_event_hook.invoke<void>(0,key,0);}

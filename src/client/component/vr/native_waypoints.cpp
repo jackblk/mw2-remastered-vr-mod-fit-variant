@@ -37,7 +37,7 @@ namespace vr::native_waypoints
 		cursor commands() noexcept
 		{
 			const void* allocator{}; cursor out{};
-			if (utils::native_memory::read_bytes(&allocator,reinterpret_cast<void*>(0x150F911A8),sizeof(allocator)))
+			if (utils::native_memory::read_bytes(&allocator,reinterpret_cast<void*>(game::build::relocate(0x150F911A8)),sizeof(allocator)))
 				utils::native_memory::read_bytes(&out,allocator,sizeof(out));
 			if (out.base<0x10000 || out.used>0x400000) return {};
 			return out;
@@ -72,7 +72,7 @@ namespace vr::native_waypoints
 				std::array<float,2> xy{}; directional_ui::vec3 position{};
 				if (!utils::native_memory::read_bytes(xy.data(),point,sizeof(xy)) || !utils::native_memory::read_bytes(position.data(),world,sizeof(position)) ||
 					!utils::native_memory::read_bytes(m.viewport.data(),static_cast<const std::byte*>(placement)+0x20,sizeof(m.viewport)) ||
-					!utils::native_memory::read_bytes(m.tangent.data(),reinterpret_cast<void*>(0x141BC2510),sizeof(m.tangent)))
+					!utils::native_memory::read_bytes(m.tangent.data(),reinterpret_cast<void*>(game::build::relocate(0x141BC2510)),sizeof(m.tangent)))
 				{ s.failed=true; return result; }
 				// The alternate height-scaled waypoint projects its bottom and top;
 				// its visual center is their midpoint, not either individual endpoint.

@@ -501,8 +501,8 @@ namespace vr::gameplay::vehicles
 			return;
 		}
 		short index{};
-		if (!read(reinterpret_cast<void*>(0x14b113080), size_t(c.entity) * 2, index) || index <= 0 ||
-		    index >= 4096 || object != reinterpret_cast<void*>(0x14ae2dff0 + size_t(index) * 0x240))
+		if (!read(reinterpret_cast<void*>(game::build::relocate(0x14b113080)), size_t(c.entity) * 2, index) || index <= 0 ||
+		    index >= 4096 || object != reinterpret_cast<void*>(game::build::relocate(0x14ae2dff0) + size_t(index) * 0x240))
 			return;
 		unsigned char count{};
 		game::XModel** models{};
@@ -538,7 +538,7 @@ namespace vr::gameplay::vehicles
 				if (handle >= 0 && read(object, 0x80, calculated) &&
 				    (calculated[unsigned(handle) / 32] & (0x80000000u >> (unsigned(handle) % 32))) &&
 				    read(matrices, 0, root) && read(matrices, size_t(handle) * 32, bar) &&
-				    read(reinterpret_cast<void*>(0x141e39d30), 0, view) && read(view, 0x58, view_offset))
+				    read(reinterpret_cast<void*>(game::build::relocate(0x141e39d30)), 0, view) && read(view, 0x58, view_offset))
 				{
 					auto root_pose = bind(root), handle_pose = bind(bar);
 					root_pose.position = add(root_pose.position, view_offset);

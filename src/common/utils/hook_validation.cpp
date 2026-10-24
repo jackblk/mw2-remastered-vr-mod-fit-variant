@@ -1,5 +1,7 @@
 #include "hook_validation.hpp"
 
+#include <cstring>
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
@@ -41,6 +43,98 @@ namespace utils::hook_validation
 				return false;
 			}
 		}
+
+		data_relocation relocation{};
+
+		std::int32_t read_int32(const std::uint8_t* bytes) noexcept
+		{
+			std::int32_t value{};
+			std::memcpy(&value, bytes, sizeof(value));
+			return value;
+		}
+
+		bool relocated_target(const std::uintptr_t window_address, const std::int32_t displacement) noexcept
+		{
+			const auto in_range = [](const std::uintptr_t target)
+			{
+				return target >= relocation.begin && target < relocation.end;
+			};
+
+			// Image-relative disp32 (image base in a register).
+			if (in_range(relocation.image_base + static_cast<std::uint32_t>(displacement)))
+			{
+				return true;
+			}
+
+			// RIP-relative disp32, followed by no immediate or an imm8/imm16/imm32.
+			constexpr std::uintptr_t immediates[]{0, 1, 2, 4};
+			for (const auto immediate : immediates)
+			{
+				if (in_range(window_address + 4 + immediate + static_cast<std::intptr_t>(displacement)))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		// Returns the end of an accepted relocated window covering index, or 0.
+		// A window may run past a pattern that stops inside a displacement; its
+		// unspecified high bytes then take the loaded bytes, which stay readable.
+		std::size_t relocated_window_end(const std::uintptr_t start, const std::uint8_t* actual_bytes,
+			const masked_byte_pattern& pattern, const std::size_t index, const std::size_t readable_end) noexcept
+		{
+			if (relocation.delta == 0)
+			{
+				return 0;
+			}
+
+			const auto first = index >= 3 ? index - 3 : 0;
+			for (auto window = first; window <= index; ++window)
+			{
+				if (window + 4 > readable_end)
+				{
+					break;
+				}
+
+				auto fully_masked = true;
+				std::uint8_t expected_bytes[4]{};
+				for (std::size_t i = 0; i < 4; ++i)
+				{
+					const auto position = window + i;
+					if (position < pattern.size)
+					{
+						fully_masked &= pattern.mask[position] == 0xFF;
+						expected_bytes[i] = pattern.bytes[position];
+					}
+					else
+					{
+						expected_bytes[i] = actual_bytes[position];
+					}
+				}
+
+				if (!fully_masked)
+				{
+					continue;
+				}
+
+				const auto expected = read_int32(expected_bytes);
+				const auto actual = read_int32(actual_bytes + window);
+				if (static_cast<std::int64_t>(actual) - expected == relocation.delta &&
+					relocated_target(start + window, expected))
+				{
+					return window + 4;
+				}
+			}
+
+			return 0;
+		}
+	}
+
+	void set_data_relocation(const data_relocation& value) noexcept
+	{
+		relocation = value;
 	}
 
 	masked_byte_result verify_masked_bytes(const void* address, const masked_byte_pattern& pattern) noexcept
@@ -113,6 +207,13 @@ namespace utils::hook_validation
 				const auto actual = static_cast<std::uint8_t>(actual_bytes[index] & mask);
 				if (actual != expected)
 				{
+					if (const auto window_end = relocated_window_end(start, actual_bytes, pattern, index,
+						offset + static_cast<std::size_t>(available)))
+					{
+						i = window_end - offset - 1;
+						continue;
+					}
+
 					result.status = masked_byte_status::mismatch;
 					result.checked_size = index;
 					result.mismatch_offset = index;

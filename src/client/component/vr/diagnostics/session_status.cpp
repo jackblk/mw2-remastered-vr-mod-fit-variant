@@ -152,7 +152,7 @@ namespace vr::diagnostics::detail
 		out << " scene_initialized=" << (read_scene_initialized(scene) ? yes_no(scene) : "unavailable");
 		std::uint8_t frontend{};
 		out << " frontend=" << (utils::native_memory::read_bytes(&frontend,
-			reinterpret_cast<const void*>(0x140BEBCCC), sizeof(frontend)) ? yes_no(frontend != 0) : "unavailable") << '\n';
+			reinterpret_cast<const void*>(game::build::relocate(0x140BEBCCC)), sizeof(frontend)) ? yes_no(frontend != 0) : "unavailable") << '\n';
 		for (const auto* name : {"mapname", "cl_ingame", "sv_running", "cl_paused", "cg_cinematicFullscreen"})
 			append_setting(out,name);
 		out<<"effective settings: source=native_current_values\n";

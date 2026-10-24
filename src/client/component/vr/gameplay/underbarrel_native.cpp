@@ -25,7 +25,7 @@ namespace vr::gameplay::weapons::underbarrel::native
 		template<class T>bool read(const void* p,std::size_t offset,T& value)noexcept
 		{return p && utils::native_memory::read_bytes(&value,static_cast<const std::byte*>(p)+offset,sizeof(value));}
 		const game::WeaponDef* definition(std::uint32_t token)noexcept
-		{const game::WeaponDef* out{};return token && token<512 && read(reinterpret_cast<const void*>(0x14CE01580),token*8,out) ? out : nullptr;}
+		{const game::WeaponDef* out{};return token && token<512 && read(reinterpret_cast<const void*>(game::build::relocate(0x14CE01580)),token*8,out) ? out : nullptr;}
 		std::string_view name(const game::WeaponDef* d,std::array<char,128>& buffer)noexcept
 		{const char* text{};if(!read(d,0,text)||!utils::native_memory::read_bytes(buffer.data(),text,buffer.size()))return {};auto n=strnlen_s(buffer.data(),buffer.size());return n<buffer.size() ? std::string_view(buffer.data(),n) : std::string_view{};}
 		std::uint64_t key(std::uint32_t host,bool clip,bool alternate=true)

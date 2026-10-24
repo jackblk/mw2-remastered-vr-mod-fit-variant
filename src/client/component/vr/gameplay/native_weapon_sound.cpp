@@ -40,7 +40,7 @@ namespace vr::gameplay::weapons::native_weapon_sound
 		{
 			__try
 			{
-				const auto definition = reinterpret_cast<const std::byte* const*>(0x14CE01580)[weapon];
+				const auto definition = reinterpret_cast<const std::byte* const*>(game::build::relocate(0x14CE01580))[weapon];
 				if (!definition) return false;
 				const unsigned *keys{}, *values{};
 				std::memcpy(&keys, definition + 0xa0, sizeof(keys));
@@ -48,7 +48,7 @@ namespace vr::gameplay::weapons::native_weapon_sound
 				if (!keys || !values) return false;
 				std::memcpy(out.keys.data(), keys, sizeof(out.keys));
 				std::memcpy(out.values.data(), values, sizeof(out.values));
-				out.entity = *reinterpret_cast<const signed char*>(0x141BB3C30);
+				out.entity = *reinterpret_cast<const signed char*>(game::build::relocate(0x141BB3C30));
 				return out.entity >= 0;
 			}
 			__except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ||
@@ -197,7 +197,7 @@ namespace vr::gameplay::weapons::native_weapon_sound
 		const void* list{};const char* name{};std::array<char,128> alias{};
 		if (!def || !utils::native_memory::read_bytes(&list,def+424,sizeof(list)) || !list ||
 			!utils::native_memory::read_bytes(&name,list,sizeof(name)) || !copy_name(name,alias.data(),alias.size())) return false;
-		const short entity=*reinterpret_cast<const signed char*>(0x141BB3C30);if (entity<0) return false;
+		const short entity=*reinterpret_cast<const signed char*>(game::build::relocate(0x141BB3C30));if (entity<0) return false;
 		return utils::hook::invoke<int>(play_address,entity,origin.data(),alias.data())!=-1;
 	}
 	}
@@ -283,7 +283,7 @@ namespace vr::gameplay::weapons::native_weapon_sound
 	{
 		if (!verified || !scheduler::is_executing(scheduler::pipeline::main) || !game::CL_IsCgameInitialized()) return false;
 		for (float value:origin) if (!std::isfinite(value) || std::abs(value)>1e7f) return false;
-		const short entity=*reinterpret_cast<const signed char*>(0x141BB3C30);if (entity<0) return false;
+		const short entity=*reinterpret_cast<const signed char*>(game::build::relocate(0x141BB3C30));if (entity<0) return false;
 		// Loaded alias witness: melee_hit selects h1_weapons/melee/melee_hit01/02.
 		// H2 firearm meleeHitSound aliases instead select melee_swing01/03 and
 		// cannot supply the NPC-style blunt impact requested here. Resolve the
@@ -294,7 +294,7 @@ namespace vr::gameplay::weapons::native_weapon_sound
 	{
 		if(!verified || !scheduler::is_executing(scheduler::pipeline::main) || !game::CL_IsCgameInitialized())return false;
 		for(float value:origin)if(!std::isfinite(value) || std::abs(value)>1e7f)return false;
-		const short entity=*reinterpret_cast<const signed char*>(0x141BB3C30);if(entity<0)return false;
+		const short entity=*reinterpret_cast<const signed char*>(game::build::relocate(0x141BB3C30));if(entity<0)return false;
 		// Native alias selection owns all five supplied variants. Never retain an
 		// asset pointer across zone unloads or borrow the chest knife's sound map.
 		const auto* alias=game::DB_FindXAssetHeader(game::ASSET_TYPE_SOUND,"vr_fist_hit",0).sound;
@@ -305,7 +305,7 @@ namespace vr::gameplay::weapons::native_weapon_sound
 	{
 		if(!verified || !scheduler::is_executing(scheduler::pipeline::main) || !game::CL_IsCgameInitialized())return false;
 		for(float value:origin)if(!std::isfinite(value) || std::abs(value)>1e7f)return false;
-		const short entity=*reinterpret_cast<const signed char*>(0x141BB3C30);if(entity<0)return false;
+		const short entity=*reinterpret_cast<const signed char*>(game::build::relocate(0x141BB3C30));if(entity<0)return false;
 		const auto* name=impact?"vr_melee_baton_hit":"vr_melee_baton_extend";
 		const auto* alias=game::DB_FindXAssetHeader(game::ASSET_TYPE_SOUND,name,0).sound;
 		if(!alias || !alias->aliasName || std::strcmp(alias->aliasName,name) || !alias->head || alias->count!=(impact?2:1) ||
@@ -319,7 +319,7 @@ namespace vr::gameplay::weapons::native_weapon_sound
 		for (float value : origin)
 			if (!std::isfinite(value) || std::abs(value) > 1e7f)
 				return false;
-		const short entity = *reinterpret_cast<const signed char*>(0x141BB3C30);
+		const short entity = *reinterpret_cast<const signed char*>(game::build::relocate(0x141BB3C30));
 		if (entity < 0)
 			return false;
 		// CG impact registration at 0x14039E3D2 builds bullet_explode_default
@@ -341,7 +341,7 @@ namespace vr::gameplay::weapons::native_weapon_sound
 	{
 		if(!verified || !scheduler::is_executing(scheduler::pipeline::main) || !game::CL_IsCgameInitialized())return false;
 		for(float x:origin)if(!std::isfinite(x) || std::abs(x)>1e7f)return false;
-		const short entity=*reinterpret_cast<const signed char*>(0x141BB3C30);if(entity<0)return false;
+		const short entity=*reinterpret_cast<const signed char*>(game::build::relocate(0x141BB3C30));if(entity<0)return false;
 		const auto asset=game::DB_FindXAssetHeader(game::ASSET_TYPE_SOUND,quick_reload::start_sound_alias,0);
 		quick_alias_files copied;
 		if(!copy_quick_alias_files(asset.sound,copied) || copied.count!=quick_reload::start_sound_files.size() ||

@@ -34,7 +34,7 @@ namespace vr::gameplay::hands::empty_native
 		constexpr std::uintptr_t lock_object = 0x140659010, unlock_object = 0x1406596C0;
 		constexpr std::uintptr_t config_string = 0x1403C9D60;
 		constexpr std::uintptr_t hide_emp_reticles = 0x1403BC890;
-		constexpr std::uintptr_t predicted_state = 0x141BB3C30;
+		constexpr game::build::data_address predicted_state{0x141BB3C30};
 		// The native primary viewmodel's scene identity, used only while it is
 		// absent. This is not a client DObj handle or inventory slot allocation.
 		constexpr unsigned scene_entity = 3999;
@@ -186,7 +186,7 @@ namespace vr::gameplay::hands::empty_native
 		{
 			// Same character selector as native CG_UpdateViewWeapon: PS +0x3e is
 			// the hand-model configstring index, independent of the selected gun.
-			const auto index=*reinterpret_cast<const std::uint16_t*>(predicted_state+0x3e);
+			const auto index=*reinterpret_cast<const std::uint16_t*>(predicted_state.get()+0x3e);
 			if (!index || index>=2048) return nullptr;
 			const auto* name=utils::hook::invoke<const char*>(config_string,index+0xa81);
 			if (!name || !*name || strnlen_s(name,256)==256) return nullptr;
@@ -196,7 +196,7 @@ namespace vr::gameplay::hands::empty_native
 		bool owned_requested(head_pose_bridge::spatial_frame& spatial)
 		{
 			if (!alive || !installed || !game::CL_IsCgameInitialized() || !weapons::carry::active()) return false;
-			const auto* ps=reinterpret_cast<const std::byte*>(predicted_state);
+			const auto* ps=reinterpret_cast<const std::byte*>(predicted_state.get());
 			if ((std::to_integer<unsigned>(ps[2])>=2 && std::to_integer<unsigned>(ps[2])<=3) ||
 				(*reinterpret_cast<const std::uint32_t*>(ps+0x58)&0x103000)) return false;
 			auto* model=prepared_hands.load();
@@ -350,7 +350,7 @@ namespace vr::gameplay::hands::empty_native
 			if (!enabled || !enabled->current.enabled) return false;
 			// Respect native death/spectator/cinematic suppression as well as the
 			// carry owner's hand. A delayed native selection is not an empty hand.
-            const auto* ps=reinterpret_cast<const std::byte*>(predicted_state);
+            const auto* ps=reinterpret_cast<const std::byte*>(predicted_state.get());
             const bool climbing=cliffhanger_physical::independent_hands() || sequences::independent_hands(game::CG_GetPredictedPlayerState(0));
             if(player_life::dead(game::CG_GetPredictedPlayerState(0)))return false;
             if ((std::to_integer<unsigned>(ps[2])>=2 && std::to_integer<unsigned>(ps[2])<=3) ||

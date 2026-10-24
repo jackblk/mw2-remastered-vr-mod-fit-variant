@@ -183,7 +183,7 @@ namespace vr::gameplay::mounted
 			const auto p=latest();
 			// This is the centity pose passed by the native mounted camera path.
 			// Match the current owner's object, never all pose-type-8 world turrets.
-			if (admitted(p) && p.profile==&suburban && pose==reinterpret_cast<void*>(0x141C328F0ull+std::uintptr_t(p.entity)*0x200) && owns_hands(object))
+			if (admitted(p) && p.profile==&suburban && pose==reinterpret_cast<void*>(game::build::relocate(0x141C328F0ull)+std::uintptr_t(p.entity)*0x200) && owns_hands(object))
 			{
 				alignas(16) std::array<std::byte,0xb8> local{};
 				if (independent_client_pose({static_cast<const std::byte*>(pose),local.size()},p.state.angles,local))
@@ -197,7 +197,7 @@ namespace vr::gameplay::mounted
 		void vehicle_controller_stub(const void* pose,void* object,std::uint32_t* bits)
 		{
 			const auto p=latest();
-			if(admitted(p) && p.profile==&blackhawk && pose==reinterpret_cast<void*>(0x141C328F0ull+std::uintptr_t(p.entity)*0x200) && owns_hands(object))
+			if(admitted(p) && p.profile==&blackhawk && pose==reinterpret_cast<void*>(game::build::relocate(0x141C328F0ull)+std::uintptr_t(p.entity)*0x200) && owns_hands(object))
 			{
 				alignas(16) std::array<std::byte,0xb8> local{};
 				if(independent_vehicle_pose({static_cast<const std::byte*>(pose),local.size()},p.state.angles,local))
@@ -488,7 +488,7 @@ namespace vr::gameplay::mounted
 			if(!matrices || !(read<std::uint32_t>(object,0x80+(muzzle/32)*4)&(0x80000000u>>(muzzle%32))))return false;
 			emitter=matrices[muzzle];
 		}
-		const auto* view=*reinterpret_cast<const std::byte* const*>(0x141E39D30);
+		const auto* view=*reinterpret_cast<const std::byte* const*>(game::build::relocate(0x141E39D30));
 		if(!view || !finite(emitter.position) || !finite(rotate(emitter.rotation,{1,0,0})))return false;
 		output.origin=add(emitter.position,read<vec>(view,0x58));
 		output.forward=rotate(emitter.rotation,{1,0,0});output.units=body.units_per_meter;
@@ -508,7 +508,7 @@ namespace vr::gameplay::mounted
 		// existing final native-camera boundary, before HMD composition, in every
 		// vehicle camera mode. The native flight/animation still supplies the seat.
 		vec seat{origin[0],origin[1],origin[2]};std::array<vec,3> basis{};
-		camera_geometry(reinterpret_cast<void*>(0x141C328F0ull+std::uintptr_t(p.entity)*0x200),object,seat.data(),basis[0].data());
+		camera_geometry(reinterpret_cast<void*>(game::build::relocate(0x141C328F0ull)+std::uintptr_t(p.entity)*0x200),object,seat.data(),basis[0].data());
 		if(!valid_offset_axis(basis))return {};
 		if(p.profile==&suburban)
 		{
@@ -639,7 +639,7 @@ namespace vr::gameplay::mounted
 			cached.object=object;cached.matrices=matrices;cached.timestamp=timestamp;cached.sequence=0;
 		}
 		const bool spatial=head_pose_bridge::get_spatial_frame(body);
-		const auto* view=*reinterpret_cast<const std::byte* const*>(0x141E39D30);
+		const auto* view=*reinterpret_cast<const std::byte* const*>(game::build::relocate(0x141E39D30));
 		const auto offset=view?read<vec>(view,0x58):vec{};
 		// Camera tag queries can solve this world DObj before this frame's HMD
 		// camera is composed. A later skin query must refresh the same input sample.

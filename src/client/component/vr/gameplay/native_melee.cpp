@@ -78,7 +78,7 @@ namespace vr::gameplay::melee::native
 		game::trace_t result{};
 		// G_LocationalTrace is exactly the model/surface trace used by native
 		// melee (0x14051c96e). No NPC origin sphere or head-forward auto targeting.
-		utils::hook::invoke<void>(0x1404c91b0,&result,from.data(),to.data(),0,0x280e091,reinterpret_cast<const void*>(0x140bf4a80));
+		utils::hook::invoke<void>(0x1404c91b0,&result,from.data(),to.data(),0,0x280e091,reinterpret_cast<const void*>(game::build::relocate(0x140bf4a80)));
 		if (!std::isfinite(result.fraction) || result.fraction<0 || result.fraction>=1 || result.hitType!=1 ||
 			(result.surfaceFlags&0x10)) return {};
 		const bool flesh=npc(result.hitId);

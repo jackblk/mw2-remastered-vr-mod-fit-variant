@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "nightvision_runtime.hpp"
 #include "weapon_carry_runtime.hpp"
 #include "nightvision.hpp"
@@ -128,7 +129,7 @@ namespace vr::gameplay::equipment::nightvision
 				{const std::lock_guard lock(presentation_mutex);
 					if(!presentation.sound_ready(serial,view.time))return scheduler::cond_continue;}
 				const game::snd_alias_list_t* alias{};
-				if(!utils::native_memory::read_bytes(&alias,reinterpret_cast<const void*>(on?0x141B84DA8:0x141B84DB0),sizeof(alias)) ||
+				if(!utils::native_memory::read_bytes(&alias,reinterpret_cast<const void*>(on?game::build::relocate(0x141B84DA8):game::build::relocate(0x141B84DB0)),sizeof(alias)) ||
 					!loaded_alias(alias,on?"item_nightvision_on":"item_nightvision_off"))return scheduler::cond_end;
 				if(claim_sound(view)){utils::hook::invoke<void>(0x1403801C0,0,alias);++sound_requests;}
 				return scheduler::cond_end;

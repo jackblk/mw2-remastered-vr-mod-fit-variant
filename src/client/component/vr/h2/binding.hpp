@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 
+#include "game/build.hpp"
+
 namespace vr::h2
 {
 	// A canonical native signature, not a signature inferred from each call's
@@ -47,7 +49,7 @@ namespace vr::h2
 		}
 		const T* get() const noexcept
 		{
-			return reinterpret_cast<const T*>(address_);
+			return reinterpret_cast<const T*>(game::build::relocate(address_));
 		}
 		T read() const
 		{

@@ -25,8 +25,8 @@ namespace vr::gameplay::sequences::body
 		for(unsigned slot=0;slot<story.hidden_entities.size();++slot)
 		{
 			const int entity=story.hidden_entities[slot];if(entity<=0 || entity>=4000)continue;
-			short index{};if(!read(reinterpret_cast<void*>(0x14b113080),size_t(entity)*2,index) || index<=0 || index>=4096)continue;
-			const void* object=reinterpret_cast<void*>(0x14ae2dff0+size_t(index)*0x240);
+			short index{};if(!read(reinterpret_cast<void*>(game::build::relocate(0x14b113080)),size_t(entity)*2,index) || index<=0 || index>=4096)continue;
+			const void* object=reinterpret_cast<void*>(game::build::relocate(0x14ae2dff0)+size_t(index)*0x240);
 			unsigned char count{},bones{};game::XModel** models{};game::XModel* model{};
 			if(!read(object,15,count) || !count || count>32 || !read(object,16,bones) || !bones || bones>254 ||
 				!read(object,0xd8,models) || !read(models,0,model) || !model)continue;
@@ -41,8 +41,8 @@ namespace vr::gameplay::sequences::body
 		// Client DObj handles are already used by the native viewmodel/hand
 		// adapters. Restrict this binding to the one linked scripted body instance.
 		short index{};
-		if(!read(reinterpret_cast<void*>(0x14b113080),size_t(story.linked_entity)*2,index) || index<=0 || index>=4096)return;
-		const void* object=reinterpret_cast<void*>(0x14ae2dff0+size_t(index)*0x240);
+		if(!read(reinterpret_cast<void*>(game::build::relocate(0x14b113080)),size_t(story.linked_entity)*2,index) || index<=0 || index>=4096)return;
+		const void* object=reinterpret_cast<void*>(game::build::relocate(0x14ae2dff0)+size_t(index)*0x240);
 		unsigned char count{};game::XModel** models{};game::XModel* model{};
 		if(!read(object,15,count) || count!=1 || !read(object,0xd8,models) || !read(models,0,model) || !model)return;
 		game::XModel value{};if(!read(model,0,value) || !value.name || std::string_view(value.name)!="viewbody_tf141_forest")return;

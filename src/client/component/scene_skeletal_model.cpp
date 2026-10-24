@@ -86,7 +86,7 @@ namespace scene_models
 			auto& data=*item->data_;const std::lock_guard pose_lock(data.mutex);
 			data.accepted=nullptr;
 			game::DObjAnimMat* matrices{};std::memcpy(&matrices,data.object.data()+0xa8,sizeof(matrices));
-			const auto* view=*reinterpret_cast<const std::byte* const*>(0x141E39D30);
+			const auto* view=*reinterpret_cast<const std::byte* const*>(game::build::relocate(0x141E39D30));
 			if(!matrices || !view)return;
 			std::array<float,3> offset{};std::memcpy(offset.data(),view+0x58,sizeof(offset));
 			for(float x:offset)if(!std::isfinite(x) || std::abs(x)>1e7f)return;

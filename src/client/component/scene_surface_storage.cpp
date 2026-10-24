@@ -45,7 +45,7 @@ namespace scene_surface_storage
 			if(!target_identity::get().compatibility_probe_passed)
 				throw std::runtime_error("surface storage requires the verified H2 image");
 			const auto displacement=reinterpret_cast<std::intptr_t>(banks.data())-
-				static_cast<std::intptr_t>(native_first_frontend);
+				static_cast<std::intptr_t>(native_first_frontend.get());
 			if(displacement<=0 || displacement>INT32_MAX || displacement%index_unit)
 				throw std::runtime_error("expanded surface banks are outside native displacement range");
 			auto patches=contract::patches;
@@ -55,6 +55,14 @@ namespace scene_surface_storage
 			for(auto& patch:patches)
 			{
 				verify(patch.address,patch.before.data(),patch.size);
+				// Bytes a patch keeps take the loaded image's encoding: a relocated
+				// build moves the data displacements this contract was authored with.
+				const auto* live=reinterpret_cast<const std::uint8_t*>(patch.address);
+				for(unsigned i=0;i<patch.size;++i)
+				{
+					if(patch.after[i]==patch.before[i])patch.after[i]=live[i];
+					patch.before[i]=live[i];
+				}
 				if(patch.dynamic)
 				{
 					std::uint32_t original{};

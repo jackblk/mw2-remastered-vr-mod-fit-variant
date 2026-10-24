@@ -40,7 +40,7 @@ namespace vr::gameplay::sequences::camera_reference
         if(!v.epoch || !v.position_epoch || v.linked_entity<=0 || v.linked_entity>=4000 ||
             v.rotation_tag==game_view::scripted_camera_tag::none || !game::CL_IsCgameInitialized())return reject("invalid linked camera identity");
         if(!ready())return reject("native camera tag contract rejected");
-        auto* centity=reinterpret_cast<void*>(0x141C328F0ull+std::uintptr_t(v.linked_entity)*0x200);
+        auto* centity=reinterpret_cast<void*>(game::build::relocate(0x141C328F0ull)+std::uintptr_t(v.linked_entity)*0x200);
         unsigned short entity{};if(!read(centity,0x1b4,entity) || entity!=v.linked_entity)return reject("client camera entity mismatch");
         auto* object=vr::h2::sp::client_entity_dobj(v.linked_entity,0);
         unsigned char count{};game::XModel** model_array{};std::array<game::XModel*,32> models{};

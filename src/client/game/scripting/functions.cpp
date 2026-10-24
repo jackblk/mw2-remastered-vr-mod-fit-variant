@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "functions.hpp"
 
 #include "component/gsc/script_extension.hpp"
@@ -32,7 +33,7 @@ namespace scripting
 		script_function get_function_by_index(const unsigned index)
 		{
 			static const auto function_table = &gsc::func_table;
-			static const auto method_table = 0x14B155890;
+			static const auto method_table = game::build::relocate(0x14B155890);
 
 			if (index < 0x1000)
 			{

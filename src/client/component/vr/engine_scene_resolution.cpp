@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "component/vr/native_render_contract.hpp"
 #include "engine_scene_resolution.hpp"
 #include "engine_backend_probe.hpp"
@@ -18,7 +19,7 @@ namespace vr::engine_scene_resolution
 		constexpr std::uintptr_t calculate_scene = 0x14074F670;
 		constexpr std::uintptr_t check_video_changes = 0x1403D3C10;
 		constexpr std::uintptr_t request_soft_resize = 0x1403D6B50;
-		constexpr std::uintptr_t video_config_address = 0x14EEE0CF0;
+		constexpr game::build::data_address video_config_address{0x14EEE0CF0};
 		std::atomic<phase> state{phase::awaiting_runtime};
 		std::atomic_uint64_t requested{};
 		std::mutex status_mutex;
@@ -63,7 +64,7 @@ namespace vr::engine_scene_resolution
 		{
 			ID3D11View* view{};
 			std::memcpy(&view, reinterpret_cast<const void*>(
-				native_render_contract::target_registry_base +
+				native_render_contract::target_registry_base.get() +
 				id * native_render_contract::target_registry_stride + view_offset), sizeof(view));
 			if (!view) return false;
 			Microsoft::WRL::ComPtr<ID3D11Resource> resource;
@@ -92,7 +93,7 @@ namespace vr::engine_scene_resolution
 			report observed;
 			observed.requested = unpack(requested.load(std::memory_order_acquire));
 			observed.apply_thread = GetCurrentThreadId();
-			std::memcpy(&observed.config, reinterpret_cast<const void*>(video_config_address),
+			std::memcpy(&observed.config, reinterpret_cast<const void*>(video_config_address.get()),
 				sizeof(observed.config));
 			std::uint32_t desktop_samples{};
 			const bool targets = describe_target(4, 8, observed.color, observed.color_samples) &&

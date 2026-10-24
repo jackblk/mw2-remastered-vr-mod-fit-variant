@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "game/build.hpp"
 #include "diagnostics/screen_display.hpp"
 #include "component/vr/native_render_contract.hpp"
 
@@ -38,7 +39,7 @@ namespace vr::engine_stereo_owner_pass
 	namespace
 	{
 		constexpr std::uint32_t maximum_query_polls = 240;
-		constexpr std::uintptr_t h2_gpu_context_mutex_handle = 0x140C05740;
+		constexpr game::build::data_address h2_gpu_context_mutex_handle{0x140C05740};
 		constexpr DWORD h2_gpu_context_mutex_timeout_ms = 100;
 		constexpr std::uint64_t fnv_offset = 14695981039346656037ull;
 		constexpr std::uint64_t fnv_prime = 1099511628211ull;
@@ -352,7 +353,7 @@ namespace vr::engine_stereo_owner_pass
 		public:
 			h2_gpu_context_lock() noexcept
 			{
-				handle_ = *reinterpret_cast<HANDLE*>(h2_gpu_context_mutex_handle);
+				handle_ = *reinterpret_cast<HANDLE*>(h2_gpu_context_mutex_handle.get());
 				if (handle_ == nullptr) return;
 				const auto started = std::chrono::steady_clock::now();
 				result_ = WaitForSingleObject(handle_, h2_gpu_context_mutex_timeout_ms);
@@ -1293,7 +1294,7 @@ namespace vr::engine_stereo_owner_pass
 			if (eye == 0)
 			{
 				ID3D11RenderTargetView* owner_view{};
-				const auto address = native_render_contract::target_registry_base +
+				const auto address = native_render_contract::target_registry_base.get() +
 					engine_stereo_eye_resources::isolated_target_id *
 					native_render_contract::target_registry_stride + sizeof(void*);
 				std::memcpy(&owner_view, reinterpret_cast<const void*>(address),
@@ -1790,7 +1791,7 @@ namespace vr::engine_stereo_owner_pass
 			// this image at 0x1407B07AA; stale bindings cannot authorize an input.
 			game::GfxImage* scene_image{};
 			std::memcpy(&scene_image, reinterpret_cast<const void*>(
-				native_render_contract::target_registry_base + route.source *
+				native_render_contract::target_registry_base.get() + route.source *
 				native_render_contract::target_registry_stride), sizeof(scene_image));
 			Microsoft::WRL::ComPtr<ID3D11Resource> scene_resource;
 			Microsoft::WRL::ComPtr<ID3D11Texture2D> scene_source;
@@ -1808,7 +1809,7 @@ namespace vr::engine_stereo_owner_pass
 			// Preserve the selected raw HDR source for the natural H2 tail.
 			ID3D11RenderTargetView* display_view{};
 			std::memcpy(&display_view, reinterpret_cast<const void*>(
-				native_render_contract::target_registry_base + route.destination *
+				native_render_contract::target_registry_base.get() + route.destination *
 				native_render_contract::target_registry_stride + sizeof(void*)), sizeof(display_view));
 			Microsoft::WRL::ComPtr<ID3D11Resource> display_resource;
 			Microsoft::WRL::ComPtr<ID3D11Texture2D> display_source;
@@ -1850,7 +1851,7 @@ namespace vr::engine_stereo_owner_pass
 				eye_composition::model_origins_for(active.claim.views, active.records)};
 			// H2's $scene target shares its DSV with the LDR targets. Borrow it
 			// before the next eye reuses it; consumers may depth-test, never write.
-			std::memcpy(&composition.scene_depth,reinterpret_cast<const void*>(native_render_contract::target_registry_base+
+			std::memcpy(&composition.scene_depth,reinterpret_cast<const void*>(native_render_contract::target_registry_base.get()+
 				4*native_render_contract::target_registry_stride+2*sizeof(void*)),sizeof(composition.scene_depth));
 			if (eye==auxiliary_scene::view_index)
 			{

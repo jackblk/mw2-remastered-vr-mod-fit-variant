@@ -473,7 +473,7 @@ namespace vr::gameplay::hands
 			if (!profile || !solver().binding.pose_library_data.valid ||
 			    !viewmodel_visibility::ready(profile->viewmodel.visibility))
 				return false;
-			const auto* render_view = *reinterpret_cast<const std::byte* const*>(0x141E39D30);
+			const auto* render_view = *reinterpret_cast<const std::byte* const*>(game::build::relocate(0x141E39D30));
 			if (!render_view)
 				return false;
 			vec offset{};
@@ -876,7 +876,7 @@ namespace vr::gameplay::hands
 			if (!empty && !independent && weapons::carry::active() &&
 			    owner.weapon != vr::h2::sp::weapon_selection_request.read())
 				selection_transition = true;
-			const auto* render_view = *reinterpret_cast<const std::byte* const*>(0x141E39D30);
+			const auto* render_view = *reinterpret_cast<const std::byte* const*>(game::build::relocate(0x141E39D30));
 			if (!render_view)
 			{
 				reason = "render view unavailable";
